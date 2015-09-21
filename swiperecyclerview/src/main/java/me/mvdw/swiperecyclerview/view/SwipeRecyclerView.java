@@ -12,7 +12,6 @@ import android.view.ViewConfiguration;
 
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewContentAdapter;
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
-import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
@@ -124,11 +123,17 @@ public class SwipeRecyclerView extends RecyclerView {
                         if (rect.contains(x, y)) {
                             View backLeftView = ((SwipeRecyclerViewRowView) child).getBackLeftView();
                             Rect backLeftRect = new Rect();
-                            backLeftView.getHitRect(backLeftRect);
+
+                            if(backLeftView != null) {
+                                backLeftView.getHitRect(backLeftRect);
+                            }
 
                             View backRightView = ((SwipeRecyclerViewRowView) child).getBackRightView();
                             Rect backRightRect = new Rect();
-                            backRightView.getHitRect(backRightRect);
+
+                            if(backRightView != null) {
+                                backRightView.getHitRect(backRightRect);
+                            }
 
                             if(backLeftRect.contains(x, 0)){
                                 animateClose();

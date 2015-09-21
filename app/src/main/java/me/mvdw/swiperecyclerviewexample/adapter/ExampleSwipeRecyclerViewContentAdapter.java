@@ -43,6 +43,7 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
 
         // Set front view data
         LinearLayout frontView = (LinearLayout) viewHolder.getFrontView();
+        LinearLayout backLeftView = (LinearLayout) viewHolder.getBackLeftView();
         LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
 
         final TextView title =  (TextView) frontView.findViewById(R.id.front_text_view);
@@ -55,12 +56,16 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
             }
         });
 
-        backRightView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mListener.onDeleteClicked(viewHolder.getPosition());
-            }
-        });
+        if(backRightView != null) {
+            backRightView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mListener != null) {
+                        mListener.onDeleteClicked(viewHolder.getPosition());
+                    }
+                }
+            });
+        }
     }
 
     @Override
