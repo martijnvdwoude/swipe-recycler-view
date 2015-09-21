@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:SwipeRecyclerView="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ExampleActivityFragment"
+    android:animateLayoutChanges="true">
+
+    <!--<LinearLayout-->
+        <!--android:id="@+id/empty_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="@android:color/holo_orange_dark"-->
+        <!--android:visibility="gone"-->
+        <!--android:orientation="vertical">-->
+
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:text="No items"-->
+            <!--android:layout_gravity="center"-->
+            <!--android:gravity="center"/>-->
+
+    <!--</LinearLayout>-->
+
+    <me.mvdw.swiperecyclerview.view.SwipeRecyclerView
+        android:id="@+id/swipe_recycler_view"
+        android:scrollbars="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        SwipeRecyclerView:backLeftView="@layout/swipe_recycler_view_back_left_view"
+        SwipeRecyclerView:backRightView="@layout/swipe_recycler_view_back_right_view"
+        SwipeRecyclerView:frontView="@layout/swipe_recycler_view_front_view"/>
+
+</RelativeLayout>

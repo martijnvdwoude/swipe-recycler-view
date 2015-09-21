@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <declare-styleable name="SwipeRecyclerView">
+        <attr name="frontView" format="reference"/>
+        <attr name="backRightView" format="reference"/>
+        <attr name="backLeftView" format="reference"/>
+    </declare-styleable>
+</resources>
