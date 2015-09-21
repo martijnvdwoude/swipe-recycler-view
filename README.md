@@ -15,4 +15,5 @@ Extend this adapter in your project to return views for the swipable rows in you
 - Implement more and useful attributes in addition to the attributes to provide the layouts for the front and back views
 - Find out how different ItemAnimators behave, especially in the MergeAdapter with the header and footer subadapters
 - Find out how ItemDecorators behave in combination with the MergeAdapter for dividers or spacing between items
+- Split the SwipeRecyclerViewMergeAdapter into a base RecyclerViewMergeAdapter and extend that one for the header and footer support
 - Much more...
