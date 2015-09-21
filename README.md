@@ -8,6 +8,7 @@ Extend this adapter in your project to return views for the swipable rows in you
 
 ##TODO:
 - VelocityTracker for swiping open items
+- Improve how the front and back views are added/inflated to the SwipeRecyclerViewRowView
 - Implement both swipe directions in the TouchListener (only swiping to the right is currently partially implemented)
 - Implement functionality to disable swiping in either direction to prevent revealing either back views for individual items
 - Prevent swiping open items while scrolling the RecyclerView (now only scrolling will get disabled while swiping open an item)
