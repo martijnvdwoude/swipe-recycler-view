@@ -56,6 +56,15 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
             }
         });
 
+        if(backLeftView != null) {
+            backLeftView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(mContext, "Back left clicked: " + title.getText(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
         if(backRightView != null) {
             backRightView.setOnClickListener(new View.OnClickListener() {
                 @Override

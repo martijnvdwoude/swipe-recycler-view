@@ -22,6 +22,7 @@ import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewContentA
  */
 public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewContentAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
 
+    private SwipeRecyclerView swipeRecyclerView;
     private SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter> mergeAdapter;
     private ExampleSwipeRecyclerViewContentAdapter swipeRecyclerViewAdapter;
 
@@ -46,7 +47,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerViewItems = new ArrayList<>();
 
         // Get recycler view
-        SwipeRecyclerView swipeRecyclerView = (SwipeRecyclerView) view.findViewById(me.mvdw.swiperecyclerviewexample.R.id.swipe_recycler_view);
+        swipeRecyclerView = (SwipeRecyclerView) view.findViewById(me.mvdw.swiperecyclerviewexample.R.id.swipe_recycler_view);
 
         // Set layoutmanager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -83,19 +84,25 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
     }
 
     public void addItem(){
-        count++;
+        if(swipeRecyclerView.hasOpenedItem()) {
+            swipeRecyclerView.closeOpenedItem();
+        } else {
+            count++;
 
-        SwipeRecyclerViewItem newItem = new SwipeRecyclerViewItem();
-        newItem.setText("Item number " + count);
+            SwipeRecyclerViewItem newItem = new SwipeRecyclerViewItem();
+            newItem.setText("Item number " + count);
 
-        swipeRecyclerViewItems.add(0, newItem);
+            swipeRecyclerViewItems.add(0, newItem);
 
-        mergeAdapter.notifyItemInserted(swipeRecyclerViewAdapter, 0);
+            mergeAdapter.notifyItemInserted(swipeRecyclerViewAdapter, 0);
+        }
     }
 
     @Override
     public void onDeleteClicked(int position) {
         swipeRecyclerViewItems.remove(mergeAdapter.getLocalPosition(position));
         mergeAdapter.notifyItemRemoved(swipeRecyclerViewAdapter, position);
+
+        swipeRecyclerView.closeOpenedItem();
     }
 }

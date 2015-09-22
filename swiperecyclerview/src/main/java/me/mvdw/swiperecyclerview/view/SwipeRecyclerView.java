@@ -18,22 +18,31 @@ import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
  */
 public class SwipeRecyclerView extends RecyclerView {
 
-    private Context mContext;
-
     private SwipeRecyclerViewRowView mTouchedRowView;
 
     float startX = 0;
 //    float velocityX = 0;
-
-    private boolean mOpened;
-    private boolean mIsSwiping;
-
 //    private VelocityTracker velocityTracker;
     private int mTouchSlop;
 
     int mFrontViewResourceId;
     int mBackLeftViewResourceId;
     int mBackRightViewResourceId;
+
+    private SwipeStatus mSwipeStatus;
+    private OpenStatus mOpenStatus = OpenStatus.CLOSED;
+
+    private enum SwipeStatus {
+        NOT_SWIPING,
+        LEFT,
+        RIGHT
+    }
+
+    private enum OpenStatus {
+        CLOSED,
+        LEFT,
+        RIGHT
+    }
 
     public SwipeRecyclerView(Context context) {
         super(context);
@@ -118,7 +127,7 @@ public class SwipeRecyclerView extends RecyclerView {
                     child = this.getChildAt(i);
                     child.getHitRect(rect);
                     if (rect.contains(x, y)) {
-                        if(mOpened){
+                        if(mOpenStatus != OpenStatus.CLOSED){
                             View backLeftView = ((SwipeRecyclerViewRowView) child).getBackLeftView();
                             Rect backLeftRect = new Rect();
 
@@ -133,24 +142,18 @@ public class SwipeRecyclerView extends RecyclerView {
                                 backRightView.getHitRect(backRightRect);
                             }
 
-                            if(backLeftRect.contains(x, 0)){
-                                animateClose();
-                                mOpened = false;
-
+                            // If a click happens in the area of the back views, pass the event to the row
+                            if(mOpenStatus == OpenStatus.LEFT && backLeftRect.contains(x, 0)){
                                 return false;
-                            } else if(backRightRect.contains(x, 0)){
-                                animateClose();
-                                mOpened = false;
-
+                            } else if(mOpenStatus == OpenStatus.RIGHT && backRightRect.contains(x, 0)){
                                 return false;
                             }
 
-                            // Close opened view
-                            animateClose();
-                            mOpened = false;
-                            mIsSwiping = false;
+                            // Otherwise intercept it and just close the row
+                            closeOpenedItem();
 
                             return true;
+
                         } else {
                             mTouchedRowView = ((SwipeRecyclerViewRowView) child);
 
@@ -173,21 +176,33 @@ public class SwipeRecyclerView extends RecyclerView {
 
                 final float deltaX = calculateDeltaX(motionEvent);
 
-                if(deltaX > mTouchSlop && mTouchedRowView != null){
-                    View frontView = mTouchedRowView.getFrontView();
-                    frontView.setTranslationX(motionEvent.getRawX() - startX);
-                    mIsSwiping = true;
-                    return true;
+                if(mTouchedRowView != null){
+                    if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
+                        // Swipe left
+                        View frontView = mTouchedRowView.getFrontView();
+                        frontView.setTranslationX(motionEvent.getRawX() - startX);
+                        mSwipeStatus = SwipeStatus.LEFT;
+                        return true;
+                    } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
+                        // Swipe right
+                        View frontView = mTouchedRowView.getFrontView();
+                        frontView.setTranslationX(motionEvent.getRawX() - startX);
+                        mSwipeStatus = SwipeStatus.RIGHT;
+                        return true;
+                    }
                 }
 
                 break;
 
             case MotionEvent.ACTION_UP:
 
-                if(mIsSwiping){
-                    animateOpen();
-                    mOpened = true;
+                if(mSwipeStatus == SwipeStatus.LEFT){
+                    openRightAnimated();
+                } else if(mSwipeStatus == SwipeStatus.RIGHT){
+                    openLeftAnimated();
                 }
+
+                mSwipeStatus = SwipeStatus.NOT_SWIPING;
 
                 break;
         }
@@ -196,14 +211,26 @@ public class SwipeRecyclerView extends RecyclerView {
     }
 
     private float calculateDeltaX(MotionEvent motionEvent){
-        return Math.abs(motionEvent.getX() - startX);
+        return motionEvent.getX() - startX;
     }
 
     /**
      * Preliminary animation methods
      *
      */
-    private void animateOpen(){
+    private void openLeftAnimated(){
+        mOpenStatus = OpenStatus.LEFT;
+
+        View frontView = mTouchedRowView.getFrontView();
+        View backLeftView = mTouchedRowView.getBackLeftView();
+        ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f + backLeftView.getWidth());
+        anim.setDuration(300);
+        anim.start();
+    }
+
+    private void openRightAnimated(){
+        mOpenStatus = OpenStatus.RIGHT;
+
         View frontView = mTouchedRowView.getFrontView();
         View backRightView = mTouchedRowView.getBackRightView();
         ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f - backRightView.getWidth());
@@ -211,7 +238,18 @@ public class SwipeRecyclerView extends RecyclerView {
         anim.start();
     }
 
-    private void animateClose(){
+    /**
+     * Public methods
+     *
+     */
+    public boolean hasOpenedItem(){
+        return mOpenStatus != OpenStatus.CLOSED;
+
+    }
+
+    public void closeOpenedItem(){
+        mOpenStatus = OpenStatus.CLOSED;
+
         View frontView = mTouchedRowView.getFrontView();
         ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f);
         anim.setDuration(300);
