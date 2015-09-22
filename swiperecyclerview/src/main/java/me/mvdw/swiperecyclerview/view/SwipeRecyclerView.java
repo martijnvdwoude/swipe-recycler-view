@@ -200,6 +200,8 @@ public class SwipeRecyclerView extends RecyclerView {
                         if(absVelocityX >= mMinFlingVelocity
                                 || Math.abs(deltaX) > mTouchedRowView.getBackRightView().getWidth() / 2)
                             mOpeningStatus = OpeningStatus.LEFT;
+                        else
+                            mOpeningStatus = OpeningStatus.NOT_OPENING;
 
                         return true;
                     } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
@@ -209,6 +211,8 @@ public class SwipeRecyclerView extends RecyclerView {
                         if(absVelocityX >= mMinFlingVelocity
                                 || Math.abs(deltaX) > mTouchedRowView.getBackLeftView().getWidth() / 2)
                             mOpeningStatus = OpeningStatus.RIGHT;
+                        else
+                            mOpeningStatus = OpeningStatus.NOT_OPENING;
 
                         return true;
                     }
