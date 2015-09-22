@@ -123,26 +123,27 @@ public class SwipeRecyclerView extends RecyclerView {
                 int x = (int) motionEvent.getRawX() - listViewCoords[0];
                 int y = (int) motionEvent.getRawY() - listViewCoords[1];
                 View child;
+
                 for (int i = 0; i < childCount; i++) {
                     child = this.getChildAt(i);
                     child.getHitRect(rect);
+
                     if (rect.contains(x, y)) {
                         if(mOpenStatus != OpenStatus.CLOSED){
-                            View backLeftView = ((SwipeRecyclerViewRowView) child).getBackLeftView();
+                            // Get hit rects of back views
                             Rect backLeftRect = new Rect();
 
-                            if(backLeftView != null) {
-                                backLeftView.getHitRect(backLeftRect);
+                            if(((SwipeRecyclerViewRowView) child).getBackLeftView() != null) {
+                                ((SwipeRecyclerViewRowView) child).getBackLeftView().getHitRect(backLeftRect);
                             }
 
-                            View backRightView = ((SwipeRecyclerViewRowView) child).getBackRightView();
                             Rect backRightRect = new Rect();
 
-                            if(backRightView != null) {
-                                backRightView.getHitRect(backRightRect);
+                            if(((SwipeRecyclerViewRowView) child).getBackRightView() != null) {
+                                ((SwipeRecyclerViewRowView) child).getBackRightView().getHitRect(backRightRect);
                             }
 
-                            // If a click happens in the area of the back views, pass the event to the row
+                            // If a click happens in the hit rects of the back views, pass the event to the row
                             if(mOpenStatus == OpenStatus.LEFT && backLeftRect.contains(x, 0)){
                                 return false;
                             } else if(mOpenStatus == OpenStatus.RIGHT && backRightRect.contains(x, 0)){
@@ -178,15 +179,13 @@ public class SwipeRecyclerView extends RecyclerView {
 
                 if(mTouchedRowView != null){
                     if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
-                        // Swipe left
-                        View frontView = mTouchedRowView.getFrontView();
-                        frontView.setTranslationX(motionEvent.getRawX() - startX);
+                        // Swipe left, revealing right view
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
                         mSwipeStatus = SwipeStatus.LEFT;
                         return true;
                     } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
-                        // Swipe right
-                        View frontView = mTouchedRowView.getFrontView();
-                        frontView.setTranslationX(motionEvent.getRawX() - startX);
+                        // Swipe right, revealing left view
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
                         mSwipeStatus = SwipeStatus.RIGHT;
                         return true;
                     }
@@ -221,9 +220,12 @@ public class SwipeRecyclerView extends RecyclerView {
     private void openLeftAnimated(){
         mOpenStatus = OpenStatus.LEFT;
 
-        View frontView = mTouchedRowView.getFrontView();
-        View backLeftView = mTouchedRowView.getBackLeftView();
-        ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f + backLeftView.getWidth());
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                mTouchedRowView.getFrontView(),
+                "translationX",
+                mTouchedRowView.getFrontView().getTranslationX(),
+                0f + mTouchedRowView.getBackLeftView().getWidth());
+
         anim.setDuration(300);
         anim.start();
     }
@@ -231,9 +233,12 @@ public class SwipeRecyclerView extends RecyclerView {
     private void openRightAnimated(){
         mOpenStatus = OpenStatus.RIGHT;
 
-        View frontView = mTouchedRowView.getFrontView();
-        View backRightView = mTouchedRowView.getBackRightView();
-        ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f - backRightView.getWidth());
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                mTouchedRowView.getFrontView(),
+                "translationX",
+                mTouchedRowView.getFrontView().getTranslationX(),
+                0f - mTouchedRowView.getBackRightView().getWidth());
+
         anim.setDuration(300);
         anim.start();
     }
@@ -244,14 +249,17 @@ public class SwipeRecyclerView extends RecyclerView {
      */
     public boolean hasOpenedItem(){
         return mOpenStatus != OpenStatus.CLOSED;
-
     }
 
     public void closeOpenedItem(){
         mOpenStatus = OpenStatus.CLOSED;
 
-        View frontView = mTouchedRowView.getFrontView();
-        ObjectAnimator anim = ObjectAnimator.ofFloat(frontView, "translationX", frontView.getTranslationX(), 0f);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                mTouchedRowView.getFrontView(),
+                "translationX",
+                mTouchedRowView.getFrontView().getTranslationX(),
+                0f);
+
         anim.setDuration(300);
         anim.start();
     }
