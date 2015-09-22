@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 
@@ -22,18 +23,20 @@ public class SwipeRecyclerView extends RecyclerView {
 
     float startX = 0;
 //    float velocityX = 0;
-//    private VelocityTracker velocityTracker;
+    private VelocityTracker mVelocityTracker;
     private int mTouchSlop;
+    private int mMinFlingVelocity;
+    private int mMaxFlingVelocity;
 
     int mFrontViewResourceId;
     int mBackLeftViewResourceId;
     int mBackRightViewResourceId;
 
-    private SwipeStatus mSwipeStatus;
+    private OpeningStatus mOpeningStatus;
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
-    private enum SwipeStatus {
-        NOT_SWIPING,
+    private enum OpeningStatus {
+        NOT_OPENING,
         LEFT,
         RIGHT
     }
@@ -66,6 +69,8 @@ public class SwipeRecyclerView extends RecyclerView {
 
         ViewConfiguration viewConfiguration = ViewConfiguration.get(this.getContext());
         mTouchSlop = viewConfiguration.getScaledTouchSlop();
+        mMinFlingVelocity = viewConfiguration.getScaledMinimumFlingVelocity() * 16;
+        mMaxFlingVelocity = viewConfiguration.getScaledMaximumFlingVelocity();
     }
 
     public SwipeRecyclerView(Context context, AttributeSet attrs, int defStyle) {
@@ -156,7 +161,11 @@ public class SwipeRecyclerView extends RecyclerView {
                             return true;
 
                         } else {
+                            // Save the touched row and pass the event to the row
                             mTouchedRowView = ((SwipeRecyclerViewRowView) child);
+
+                            mVelocityTracker = VelocityTracker.obtain();
+                            mVelocityTracker.addMovement(motionEvent);
 
                             return false;
                         }
@@ -177,16 +186,29 @@ public class SwipeRecyclerView extends RecyclerView {
 
                 final float deltaX = calculateDeltaX(motionEvent);
 
+                mVelocityTracker.addMovement(motionEvent);
+                mVelocityTracker.computeCurrentVelocity(1000);
+                float velocityX = mVelocityTracker.getXVelocity();
+                float absVelocityX = Math.abs(velocityX);
+
                 if(mTouchedRowView != null){
                     if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                         // Swipe left, revealing right view
                         mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
-                        mSwipeStatus = SwipeStatus.LEFT;
+
+                        if(absVelocityX >= mMinFlingVelocity
+                                || Math.abs(deltaX) > mTouchedRowView.getBackRightView().getWidth() / 2)
+                            mOpeningStatus = OpeningStatus.LEFT;
+
                         return true;
                     } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                         // Swipe right, revealing left view
                         mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
-                        mSwipeStatus = SwipeStatus.RIGHT;
+
+                        if(absVelocityX >= mMinFlingVelocity
+                                || Math.abs(deltaX) > mTouchedRowView.getBackLeftView().getWidth() / 2)
+                            mOpeningStatus = OpeningStatus.RIGHT;
+
                         return true;
                     }
                 }
@@ -195,13 +217,15 @@ public class SwipeRecyclerView extends RecyclerView {
 
             case MotionEvent.ACTION_UP:
 
-                if(mSwipeStatus == SwipeStatus.LEFT){
+                if(mOpeningStatus == OpeningStatus.LEFT){
                     openRightAnimated();
-                } else if(mSwipeStatus == SwipeStatus.RIGHT){
+                } else if(mOpeningStatus == OpeningStatus.RIGHT){
                     openLeftAnimated();
+                } else {
+                    closeOpenedItem();
                 }
 
-                mSwipeStatus = SwipeStatus.NOT_SWIPING;
+                mOpeningStatus = OpeningStatus.NOT_OPENING;
 
                 break;
         }
