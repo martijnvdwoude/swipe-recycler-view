@@ -10,11 +10,10 @@ Finally set this adapter on the `SwipeRecyclerView` directly or add it to a `Swi
 
 ##TODO:
 - VelocityTracker for swiping open items
-- Improve how the front and back views are added/inflated to the SwipeRecyclerViewRowView
-- Implement both swipe directions in the TouchListener (only swiping to the right is currently partially implemented)
+- Further improve how the front and back views are added/inflated to the SwipeRecyclerViewRowView
 - Implement functionality to disable swiping in either direction to prevent revealing either back views for individual items
 - Prevent swiping open items while scrolling the RecyclerView (now only scrolling will get disabled while swiping open an item)
-- Public methods for the SwipeRecyclerView
+- More public methods for the SwipeRecyclerView
 - Implement functionality to rearrange items in their adapters
 - Implement more and useful attributes in addition to the attributes to provide the layouts for the front and back views
 - Find out how different ItemAnimators behave, especially in the MergeAdapter with the header and footer subadapters
