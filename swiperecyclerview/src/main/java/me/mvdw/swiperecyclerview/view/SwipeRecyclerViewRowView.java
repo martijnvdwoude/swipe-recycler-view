@@ -4,15 +4,14 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.view.ViewStub;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 
 import me.mvdw.swiperecyclerview.R;
 
 /**
  * Created by Martijn van der Woude on 08-09-15.
  */
-public class SwipeRecyclerViewRowView extends LinearLayout {
+public class SwipeRecyclerViewRowView extends FrameLayout {
 
     int mFrontViewResourceId;
     int mBackLeftViewResourceId;
@@ -51,22 +50,18 @@ public class SwipeRecyclerViewRowView extends LinearLayout {
     }
 
     public void initViews(){
+        LayoutInflater mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
         if(mBackLeftViewResourceId != 0) {
-            ViewStub stub = (ViewStub) findViewById(R.id.back_left_stub);
-            stub.setLayoutResource(mBackLeftViewResourceId);
-            mBackLeftView = (ViewGroup) stub.inflate();
+            mBackLeftView = (ViewGroup) mInflater.inflate(mBackLeftViewResourceId, (ViewGroup) findViewById(R.id.back_left_view_wrapper), true);
         }
 
         if(mBackRightViewResourceId != 0) {
-            ViewStub stub = (ViewStub) findViewById(R.id.back_right_stub);
-            stub.setLayoutResource(mBackRightViewResourceId);
-            mBackRightView = (ViewGroup) stub.inflate();
+            mBackRightView = (ViewGroup) mInflater.inflate(mBackRightViewResourceId, (ViewGroup) findViewById(R.id.back_right_view_wrapper), true);
         }
 
         if(mFrontViewResourceId != 0) {
-            ViewStub stub = (ViewStub) findViewById(R.id.front_stub);
-            stub.setLayoutResource(mFrontViewResourceId);
-            mFrontView = (ViewGroup) stub.inflate();
+            mFrontView = (ViewGroup) mInflater.inflate(mFrontViewResourceId, (ViewGroup) findViewById(R.id.front_view_wrapper), true);
         }
     }
 
