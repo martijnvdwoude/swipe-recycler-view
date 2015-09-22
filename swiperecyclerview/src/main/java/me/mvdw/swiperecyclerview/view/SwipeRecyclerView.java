@@ -70,13 +70,11 @@ public class SwipeRecyclerView extends RecyclerView {
      */
     public void setAdapter(SwipeRecyclerViewMergeAdapter adapter) {
         for(int i = 0; i < adapter.getSubAdapterCount(); i++){
-            try {
+            if(adapter.getSubAdapter(i) instanceof SwipeRecyclerViewContentAdapter){
                 SwipeRecyclerViewContentAdapter subAdapter = (SwipeRecyclerViewContentAdapter) adapter.getSubAdapter(i);
                 subAdapter.setBackLeftViewResource(mBackLeftViewResourceId);
                 subAdapter.setBackRightViewResource(mBackRightViewResourceId);
                 subAdapter.setFrontViewResource(mFrontViewResourceId);
-            } catch(ClassCastException e) {
-
             }
         }
 
@@ -109,18 +107,18 @@ public class SwipeRecyclerView extends RecyclerView {
 
                 startX = motionEvent.getRawX();
 
-                if(mOpened){
-                    Rect rect = new Rect();
-                    int childCount = this.getChildCount();
-                    int[] listViewCoords = new int[2];
-                    this.getLocationOnScreen(listViewCoords);
-                    int x = (int) motionEvent.getRawX() - listViewCoords[0];
-                    int y = (int) motionEvent.getRawY() - listViewCoords[1];
-                    View child;
-                    for (int i = 0; i < childCount; i++) {
-                        child = this.getChildAt(i);
-                        child.getHitRect(rect);
-                        if (rect.contains(x, y)) {
+                Rect rect = new Rect();
+                int childCount = this.getChildCount();
+                int[] listViewCoords = new int[2];
+                this.getLocationOnScreen(listViewCoords);
+                int x = (int) motionEvent.getRawX() - listViewCoords[0];
+                int y = (int) motionEvent.getRawY() - listViewCoords[1];
+                View child;
+                for (int i = 0; i < childCount; i++) {
+                    child = this.getChildAt(i);
+                    child.getHitRect(rect);
+                    if (rect.contains(x, y)) {
+                        if(mOpened){
                             View backLeftView = ((SwipeRecyclerViewRowView) child).getBackLeftView();
                             Rect backLeftRect = new Rect();
 
@@ -146,31 +144,20 @@ public class SwipeRecyclerView extends RecyclerView {
 
                                 return false;
                             }
-                        }
-                    }
 
-                    return true;
-                } else {
-                    Rect rect = new Rect();
-                    int childCount = this.getChildCount();
-                    int[] listViewCoords = new int[2];
-                    this.getLocationOnScreen(listViewCoords);
-                    int x = (int) motionEvent.getRawX() - listViewCoords[0];
-                    int y = (int) motionEvent.getRawY() - listViewCoords[1];
-                    View child;
-                    for (int i = 0; i < childCount; i++) {
-                        child = this.getChildAt(i);
-                        child.getHitRect(rect);
-                        if (rect.contains(x, y)) {
+                            // Close opened view
+                            animateClose();
+                            mOpened = false;
+                            mIsSwiping = false;
 
+                            return true;
+                        } else {
                             mTouchedRowView = ((SwipeRecyclerViewRowView) child);
 
-                            break;
+                            return false;
                         }
                     }
                 }
-
-                return false;
 
             case MotionEvent.ACTION_MOVE:
                 return true;
@@ -182,15 +169,6 @@ public class SwipeRecyclerView extends RecyclerView {
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
         switch (motionEvent.getActionMasked()){
-            case MotionEvent.ACTION_DOWN:
-
-                // Close opened view
-                animateClose();
-                mOpened = false;
-                mIsSwiping = false;
-
-                break;
-
             case MotionEvent.ACTION_MOVE:
 
                 final float deltaX = calculateDeltaX(motionEvent);
