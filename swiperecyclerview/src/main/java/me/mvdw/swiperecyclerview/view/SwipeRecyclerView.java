@@ -20,6 +20,7 @@ import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
 public class SwipeRecyclerView extends RecyclerView {
 
     private SwipeRecyclerViewRowView mTouchedRowView;
+    private SwipeRecyclerViewRowView mOpenedRowView;
 
     float startX = 0;
 //    float velocityX = 0;
@@ -194,7 +195,7 @@ public class SwipeRecyclerView extends RecyclerView {
                 if(mTouchedRowView != null){
                     if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                         // Swipe left, revealing right view
-                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX + mTouchSlop);
 
                         if(absVelocityX >= mMinFlingVelocity
                                 || Math.abs(deltaX) > mTouchedRowView.getBackRightView().getWidth() / 2)
@@ -203,7 +204,7 @@ public class SwipeRecyclerView extends RecyclerView {
                         return true;
                     } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                         // Swipe right, revealing left view
-                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX);
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() - startX + mTouchSlop);
 
                         if(absVelocityX >= mMinFlingVelocity
                                 || Math.abs(deltaX) > mTouchedRowView.getBackLeftView().getWidth() / 2)
@@ -218,14 +219,18 @@ public class SwipeRecyclerView extends RecyclerView {
             case MotionEvent.ACTION_UP:
 
                 if(mOpeningStatus == OpeningStatus.LEFT){
+                    mOpenedRowView = mTouchedRowView;
                     openRightAnimated();
+                    mOpeningStatus = OpeningStatus.NOT_OPENING;
                 } else if(mOpeningStatus == OpeningStatus.RIGHT){
+                    mOpenedRowView = mTouchedRowView;
                     openLeftAnimated();
-                } else {
+                    mOpeningStatus = OpeningStatus.NOT_OPENING;
+                } else if(mOpeningStatus == OpeningStatus.NOT_OPENING) {
                     closeOpenedItem();
                 }
 
-                mOpeningStatus = OpeningStatus.NOT_OPENING;
+                mTouchedRowView = null;
 
                 break;
         }
@@ -245,10 +250,10 @@ public class SwipeRecyclerView extends RecyclerView {
         mOpenStatus = OpenStatus.LEFT;
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(
-                mTouchedRowView.getFrontView(),
+                mOpenedRowView.getFrontView(),
                 "translationX",
-                mTouchedRowView.getFrontView().getTranslationX(),
-                0f + mTouchedRowView.getBackLeftView().getWidth());
+                mOpenedRowView.getFrontView().getTranslationX(),
+                0f + mOpenedRowView.getBackLeftView().getWidth());
 
         anim.setDuration(300);
         anim.start();
@@ -258,10 +263,10 @@ public class SwipeRecyclerView extends RecyclerView {
         mOpenStatus = OpenStatus.RIGHT;
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(
-                mTouchedRowView.getFrontView(),
+                mOpenedRowView.getFrontView(),
                 "translationX",
-                mTouchedRowView.getFrontView().getTranslationX(),
-                0f - mTouchedRowView.getBackRightView().getWidth());
+                mOpenedRowView.getFrontView().getTranslationX(),
+                0f - mOpenedRowView.getBackRightView().getWidth());
 
         anim.setDuration(300);
         anim.start();
@@ -278,13 +283,26 @@ public class SwipeRecyclerView extends RecyclerView {
     public void closeOpenedItem(){
         mOpenStatus = OpenStatus.CLOSED;
 
-        ObjectAnimator anim = ObjectAnimator.ofFloat(
-                mTouchedRowView.getFrontView(),
-                "translationX",
-                mTouchedRowView.getFrontView().getTranslationX(),
-                0f);
+        if(mOpenedRowView != null) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(
+                    mOpenedRowView.getFrontView(),
+                    "translationX",
+                    mOpenedRowView.getFrontView().getTranslationX(),
+                    0f);
 
-        anim.setDuration(300);
-        anim.start();
+            anim.setDuration(300);
+            anim.start();
+        } else if(mTouchedRowView != null) {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(
+                    mTouchedRowView.getFrontView(),
+                    "translationX",
+                    mTouchedRowView.getFrontView().getTranslationX(),
+                    0f);
+
+            anim.setDuration(300);
+            anim.start();
+        }
+
+        mOpenedRowView = null;
     }
 }
