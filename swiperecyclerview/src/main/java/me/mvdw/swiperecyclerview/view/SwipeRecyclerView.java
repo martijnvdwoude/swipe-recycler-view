@@ -135,6 +135,9 @@ public class SwipeRecyclerView extends RecyclerView {
                     child.getHitRect(rect);
 
                     if (rect.contains(x, y)) {
+                        // Save the touched row and pass the event to the row
+                        mTouchedRowView = ((SwipeRecyclerViewRowView) child);
+
                         if(mOpenStatus != OpenStatus.CLOSED){
                             // Get hit rects of back views
                             Rect backLeftRect = new Rect();
@@ -150,9 +153,13 @@ public class SwipeRecyclerView extends RecyclerView {
                             }
 
                             // If a click happens in the hit rects of the back views, pass the event to the row
-                            if(mOpenStatus == OpenStatus.LEFT && backLeftRect.contains(x, 0)){
+                            if(mOpenStatus == OpenStatus.LEFT
+                                    && backLeftRect.contains(x, 0)
+                                    && mTouchedRowView == mOpenedRowView){
                                 return false;
-                            } else if(mOpenStatus == OpenStatus.RIGHT && backRightRect.contains(x, 0)){
+                            } else if(mOpenStatus == OpenStatus.RIGHT
+                                    && backRightRect.contains(x, 0)
+                                    && mTouchedRowView == mOpenedRowView){
                                 return false;
                             }
 
@@ -162,9 +169,6 @@ public class SwipeRecyclerView extends RecyclerView {
                             return true;
 
                         } else {
-                            // Save the touched row and pass the event to the row
-                            mTouchedRowView = ((SwipeRecyclerViewRowView) child);
-
                             mVelocityTracker = VelocityTracker.obtain();
                             mVelocityTracker.addMovement(motionEvent);
 
