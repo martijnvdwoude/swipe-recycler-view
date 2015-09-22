@@ -9,7 +9,7 @@ Extend this adapter in your project to return views for the swipable rows in you
 Finally set this adapter on the `SwipeRecyclerView` directly or add it to a `SwipeRecyclerViewMergeAdapter` first to support multiple adapters and header and footer support.
 
 ##TODO:
-- VelocityTracker for swiping open items
+- Improve VelocityTracker for swiping open items
 - Further improve how the front and back views are added/inflated to the SwipeRecyclerViewRowView
 - Implement functionality to disable swiping in either direction to prevent revealing either back views for individual items
 - Prevent swiping open items while scrolling the RecyclerView (now only scrolling will get disabled while swiping open an item)
