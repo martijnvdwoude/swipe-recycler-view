@@ -2,6 +2,7 @@ package me.mvdw.swiperecyclerviewexample.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,10 +13,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
-import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerView;
 import me.mvdw.swiperecyclerviewexample.R;
 import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewContentAdapter;
+import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
@@ -47,7 +48,8 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerViewItems = new ArrayList<>();
 
         // Get recycler view
-        swipeRecyclerView = (SwipeRecyclerView) view.findViewById(me.mvdw.swiperecyclerviewexample.R.id.swipe_recycler_view);
+        swipeRecyclerView = (SwipeRecyclerView) view.findViewById(R.id.swipe_recycler_view);
+        swipeRecyclerView.setCloseInterpolator(new FastOutSlowInInterpolator());
 
         // Set layoutmanager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());

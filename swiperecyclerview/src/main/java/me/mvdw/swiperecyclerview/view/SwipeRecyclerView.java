@@ -1,6 +1,7 @@
 package me.mvdw.swiperecyclerview.view;
 
 import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -32,9 +33,11 @@ public class SwipeRecyclerView extends RecyclerView {
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
 
-    int mFrontViewResourceId;
-    int mBackLeftViewResourceId;
-    int mBackRightViewResourceId;
+    private int mFrontViewResourceId;
+    private int mBackLeftViewResourceId;
+    private int mBackRightViewResourceId;
+
+    private TimeInterpolator mClosingInterpolator;
 
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
@@ -357,6 +360,11 @@ public class SwipeRecyclerView extends RecyclerView {
                     0f);
 
             anim.setDuration(300);
+
+            if(mClosingInterpolator != null) {
+                anim.setInterpolator(mClosingInterpolator);
+            }
+
             anim.start();
         } else if(mTouchedRowView != null) {
             ObjectAnimator anim = ObjectAnimator.ofFloat(
@@ -366,9 +374,18 @@ public class SwipeRecyclerView extends RecyclerView {
                     0f);
 
             anim.setDuration(300);
+
+            if(mClosingInterpolator != null) {
+                anim.setInterpolator(mClosingInterpolator);
+            }
+
             anim.start();
         }
 
         mOpenedRowView = null;
+    }
+
+    public void setCloseInterpolator(TimeInterpolator closingInterpolator){
+        this.mClosingInterpolator = closingInterpolator;
     }
 }
