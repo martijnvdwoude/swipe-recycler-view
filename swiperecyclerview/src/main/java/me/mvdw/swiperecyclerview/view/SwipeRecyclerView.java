@@ -37,7 +37,7 @@ public class SwipeRecyclerView extends RecyclerView {
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
 
-    private TimeInterpolator mClosingInterpolator;
+    private TimeInterpolator mCloseInterpolator;
 
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
@@ -230,9 +230,16 @@ public class SwipeRecyclerView extends RecyclerView {
                                 // If swiped with enough velocity
                                 // Or swiped past half of the back view
                                 if (mVelocityX >= mMinFlingVelocity
-                                        || mTouchedRowView.getFrontView().getTranslationX() < -mTouchedRowView.getBackRightView().getWidth() / 2) {
+                                        || mTouchedRowView.getFrontView().getTranslationX() < mTouchedRowView.getBackRightView().getWidth() / 2 * -1) {
                                     mOpenedRowView = mTouchedRowView;
-                                    openBackRightView();
+                                    float distanceToTravel = mTouchedRowView.getBackRightView().getWidth() - Math.abs(mTouchedRowView.getFrontView().getTranslationX());
+
+                                    if(Math.abs(mDeltaX) < mTouchedRowView.getBackRightView().getWidth()
+                                            && mVelocityX >= mMinFlingVelocity) {
+                                        openBackRightView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
+                                    } else {
+                                        openBackRightView(300);
+                                    }
                                 } else {
                                     closeOpenedItem();
                                 }
@@ -243,7 +250,14 @@ public class SwipeRecyclerView extends RecyclerView {
                                 if (mVelocityX >= mMinFlingVelocity
                                         || mTouchedRowView.getFrontView().getTranslationX() > mTouchedRowView.getBackLeftView().getWidth() / 2) {
                                     mOpenedRowView = mTouchedRowView;
-                                    openBackLeftView();
+                                    float distanceToTravel = mTouchedRowView.getBackLeftView().getWidth() - mTouchedRowView.getFrontView().getTranslationX();
+
+                                    if(mDeltaX < mTouchedRowView.getBackLeftView().getWidth()
+                                            && mVelocityX >= mMinFlingVelocity) {
+                                        openBackLeftView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
+                                    } else {
+                                        openBackLeftView(300);
+                                    }
                                 } else {
                                     closeOpenedItem();
                                 }
@@ -255,7 +269,7 @@ public class SwipeRecyclerView extends RecyclerView {
                             if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // Animate view back to where it was
-                                openBackLeftView();
+                                openBackLeftView(300);
                             } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // If swiped with enough velocity
@@ -264,7 +278,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                     closeOpenedItem();
                                 } else {
                                     // Animate view back to where it was
-                                    openBackLeftView();
+                                    openBackLeftView(300);
                                 }
                             } else {
                                 // If clicking and no movement, just close the opened row
@@ -277,7 +291,7 @@ public class SwipeRecyclerView extends RecyclerView {
                             if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // Animate view back to where it was
-                                openBackRightView();
+                                openBackRightView(300);
                             } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
@@ -287,7 +301,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                     closeOpenedItem();
                                 } else {
                                     // Animate view back to where it was
-                                    openBackRightView();
+                                    openBackRightView(300);
                                 }
                             } else {
                                 // If clicking and no movement, just close the opened row
@@ -315,7 +329,7 @@ public class SwipeRecyclerView extends RecyclerView {
      * Preliminary animation methods
      *
      */
-    private void openBackLeftView(){
+    private void openBackLeftView(int animationDuration){
         mOpenStatus = OpenStatus.LEFT;
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(
@@ -324,11 +338,11 @@ public class SwipeRecyclerView extends RecyclerView {
                 mOpenedRowView.getFrontView().getTranslationX(),
                 0f + mOpenedRowView.getBackLeftView().getWidth());
 
-        anim.setDuration(300);
+        anim.setDuration(animationDuration);
         anim.start();
     }
 
-    private void openBackRightView(){
+    private void openBackRightView(int animationDuration){
         mOpenStatus = OpenStatus.RIGHT;
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(
@@ -337,8 +351,12 @@ public class SwipeRecyclerView extends RecyclerView {
                 mOpenedRowView.getFrontView().getTranslationX(),
                 0f - mOpenedRowView.getBackRightView().getWidth());
 
-        anim.setDuration(300);
+        anim.setDuration(animationDuration);
         anim.start();
+    }
+
+    private int getAnimationDurationForVelocity(float velocity, float distanceToTravel){
+        return (int) (distanceToTravel / (velocity / 1000));
     }
 
     /**
@@ -361,8 +379,8 @@ public class SwipeRecyclerView extends RecyclerView {
 
             anim.setDuration(300);
 
-            if(mClosingInterpolator != null) {
-                anim.setInterpolator(mClosingInterpolator);
+            if(mCloseInterpolator != null) {
+                anim.setInterpolator(mCloseInterpolator);
             }
 
             anim.start();
@@ -375,8 +393,8 @@ public class SwipeRecyclerView extends RecyclerView {
 
             anim.setDuration(300);
 
-            if(mClosingInterpolator != null) {
-                anim.setInterpolator(mClosingInterpolator);
+            if(mCloseInterpolator != null) {
+                anim.setInterpolator(mCloseInterpolator);
             }
 
             anim.start();
@@ -385,7 +403,7 @@ public class SwipeRecyclerView extends RecyclerView {
         mOpenedRowView = null;
     }
 
-    public void setCloseInterpolator(TimeInterpolator closingInterpolator){
-        this.mClosingInterpolator = closingInterpolator;
+    public void setCloseInterpolator(TimeInterpolator closeInterpolator){
+        this.mCloseInterpolator = closeInterpolator;
     }
 }
