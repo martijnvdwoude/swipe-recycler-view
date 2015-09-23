@@ -166,7 +166,6 @@ public class SwipeRecyclerView extends RecyclerView {
 
                         } else {
                             mVelocityTracker = VelocityTracker.obtain();
-//                            mVelocityTracker.addMovement(motionEvent);
 
                             return false;
                         }
@@ -197,8 +196,19 @@ public class SwipeRecyclerView extends RecyclerView {
                 // Put translation on frontview, following finger
                 if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop) {
                     mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
+
+                    // Return false to prevent scrolling while swiping open row
+                    return false;
                 } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop) {
                     mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
+
+                    // Return false to prevent scrolling while swiping open row
+                    return false;
+                }
+
+                // If a row is open, prevent scrolling
+                if(mOpenStatus != OpenStatus.CLOSED){
+                    return false;
                 }
 
                 break;
@@ -209,75 +219,79 @@ public class SwipeRecyclerView extends RecyclerView {
 
                 // If there is a touched view
                 if(mTouchedRowView != null){
-                    if(mOpenStatus == OpenStatus.LEFT) {
-                        // Left view is already opened
+                    switch(mOpenStatus){
 
-                        if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the right
-                            // Animate view back to where it was
-                            openBackLeftView();
-                        } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the left
-                            // If swiped with enough velocity
-                            if (mVelocityX >= mMinFlingVelocity
-                                    || mTouchedRowView.getFrontView().getTranslationX() < mTouchedRowView.getBackLeftView().getWidth() / 2) {
-                                closeOpenedItem();
-                            } else {
+                        case CLOSED:
+                            if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the left
+                                // If swiped with enough velocity
+                                // Or swiped past half of the back view
+                                if (mVelocityX >= mMinFlingVelocity
+                                        || mTouchedRowView.getFrontView().getTranslationX() < -mTouchedRowView.getBackRightView().getWidth() / 2) {
+                                    mOpenedRowView = mTouchedRowView;
+                                    openBackRightView();
+                                } else {
+                                    closeOpenedItem();
+                                }
+                            } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the right
+                                // If swiped with enough velocity
+                                // Or swiped past half of the back view
+                                if (mVelocityX >= mMinFlingVelocity
+                                        || mTouchedRowView.getFrontView().getTranslationX() > mTouchedRowView.getBackLeftView().getWidth() / 2) {
+                                    mOpenedRowView = mTouchedRowView;
+                                    openBackLeftView();
+                                } else {
+                                    closeOpenedItem();
+                                }
+                            }
+
+                            break;
+
+                        case LEFT:
+                            if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the right
                                 // Animate view back to where it was
                                 openBackLeftView();
-                            }
-                        } else {
-                            // If clicking and no movement, just close the opened row
-                            closeOpenedItem();
-                        }
-                    } else if(mOpenStatus == OpenStatus.RIGHT){
-                        // Right view is already opened
-
-                        if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the left
-                            // Animate view back to where it was
-                            openBackRightView();
-                        } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the right
-                            // If swiped with enough velocity
-                            // Or swiped past half of the back view
-                            if (mVelocityX >= mMinFlingVelocity
-                                    || mTouchedRowView.getFrontView().getTranslationX() > mTouchedRowView.getBackRightView().getWidth() / 2 * -1) {
-                                closeOpenedItem();
+                            } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the left
+                                // If swiped with enough velocity
+                                if (mVelocityX >= mMinFlingVelocity
+                                        || mTouchedRowView.getFrontView().getTranslationX() < mTouchedRowView.getBackLeftView().getWidth() / 2) {
+                                    closeOpenedItem();
+                                } else {
+                                    // Animate view back to where it was
+                                    openBackLeftView();
+                                }
                             } else {
+                                // If clicking and no movement, just close the opened row
+                                closeOpenedItem();
+                            }
+
+                            break;
+
+                        case RIGHT:
+                            if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the left
                                 // Animate view back to where it was
                                 openBackRightView();
+                            } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                                // Swiped to the right
+                                // If swiped with enough velocity
+                                // Or swiped past half of the back view
+                                if (mVelocityX >= mMinFlingVelocity
+                                        || mTouchedRowView.getFrontView().getTranslationX() > mTouchedRowView.getBackRightView().getWidth() / 2 * -1) {
+                                    closeOpenedItem();
+                                } else {
+                                    // Animate view back to where it was
+                                    openBackRightView();
+                                }
+                            } else {
+                                // If clicking and no movement, just close the opened row
+                                closeOpenedItem();
                             }
-                        } else {
-                            // If clicking and no movement, just close the opened row
-                            closeOpenedItem();
-                        }
-                    } else if(mOpenStatus == OpenStatus.CLOSED){
-                        // No view is already opened
 
-                        if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the left
-                            // If swiped with enough velocity
-                            // Or swiped past half of the back view
-                            if (mVelocityX >= mMinFlingVelocity
-                                    || mTouchedRowView.getFrontView().getTranslationX() < -mTouchedRowView.getBackRightView().getWidth() / 2) {
-                                mOpenedRowView = mTouchedRowView;
-                                openBackRightView();
-                            } else {
-                                closeOpenedItem();
-                            }
-                        } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
-                            // Swiped to the right
-                            // If swiped with enough velocity
-                            // Or swiped past half of the back view
-                            if (mVelocityX >= mMinFlingVelocity
-                                    || mTouchedRowView.getFrontView().getTranslationX() > mTouchedRowView.getBackLeftView().getWidth() / 2) {
-                                mOpenedRowView = mTouchedRowView;
-                                openBackLeftView();
-                            } else {
-                                closeOpenedItem();
-                            }
-                        }
+                            break;
                     }
                 }
 
