@@ -42,6 +42,8 @@ public class SwipeRecyclerView extends RecyclerView {
 
     private TimeInterpolator mCloseRowInterpolator;
 
+    private boolean mIsAnimating;
+
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
     private enum OpenStatus {
@@ -144,7 +146,12 @@ public class SwipeRecyclerView extends RecyclerView {
 
                         mTouchedRowViewTranslationX = mTouchedRowView.getFrontView().getTranslationX();
 
-                        if(mOpenStatus != OpenStatus.CLOSED){
+                        if(mOpenStatus != OpenStatus.CLOSED
+                                && mTouchedRowView != mOpenedRowView) {
+                            closeOpenedItem();
+
+                            return true;
+                        } else if(mOpenStatus != OpenStatus.CLOSED){
                             // Get hit rects of back views
                             Rect backLeftRect = new Rect();
 
@@ -191,32 +198,37 @@ public class SwipeRecyclerView extends RecyclerView {
         switch (motionEvent.getActionMasked()){
             case MotionEvent.ACTION_MOVE:
 
-                // Measure moved distance by finger
-                mDeltaX = calculateDeltaX(motionEvent);
+                if(!mIsAnimating && mTouchedRowView != null) {
+                    // Measure moved distance by finger
+                    mDeltaX = calculateDeltaX(motionEvent);
 
-                // Measure velocity
-                mVelocityTracker.addMovement(motionEvent);
-                mVelocityTracker.computeCurrentVelocity(1000);
-                float velocityX = mVelocityTracker.getXVelocity();
-                mVelocityX = Math.abs(velocityX);
+                    // Measure velocity
+                    mVelocityTracker.addMovement(motionEvent);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float velocityX = mVelocityTracker.getXVelocity();
+                    mVelocityX = Math.abs(velocityX);
 
-                // Put translation on frontview, following finger
-                if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop) {
-                    mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
-                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                    // Put translation on frontview, following finger
+                    if (mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop) {
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
+                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
-                    // Return false to prevent scrolling while swiping open row
-                    return false;
-                } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop) {
-                    mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
-                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                        // Return false to prevent scrolling vertical scrolling of the recyclerview while swiping open row
+                        return false;
+                    } else if (mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop) {
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
+                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
-                    // Return false to prevent scrolling while swiping open row
-                    return false;
-                }
+                        // Return false to prevent scrolling vertical scrolling of the recyclerview while swiping open row
+                        return false;
+                    }
 
-                // If a row is open, prevent scrolling
-                if(mOpenStatus != OpenStatus.CLOSED){
+                    // If a row is open, prevent vertical scrolling of the recyclerview
+                    if (mOpenStatus != OpenStatus.CLOSED) {
+                        return false;
+                    }
+                } else {
+                    mTouchedRowView = null;
                     return false;
                 }
 
@@ -350,6 +362,28 @@ public class SwipeRecyclerView extends RecyclerView {
             }
         });
 
+        anim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                mIsAnimating = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mIsAnimating = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                mIsAnimating = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+
         anim.setDuration(animationDuration);
         anim.start();
     }
@@ -366,6 +400,28 @@ public class SwipeRecyclerView extends RecyclerView {
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
                 updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+            }
+        });
+
+        anim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+                mIsAnimating = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mIsAnimating = false;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                mIsAnimating = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
             }
         });
 
@@ -427,17 +483,19 @@ public class SwipeRecyclerView extends RecyclerView {
         anim.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
-
+                mIsAnimating = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animator) {
                 mOpenedRowView = null;
+                mIsAnimating = false;
             }
 
             @Override
             public void onAnimationCancel(Animator animator) {
                 mOpenedRowView = null;
+                mIsAnimating = false;
             }
 
             @Override
