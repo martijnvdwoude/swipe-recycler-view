@@ -3,12 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="100dp"
     android:layout_height="100dp"
-    android:background="@android:color/holo_green_light">
+    android:background="@android:color/holo_green_light"
+    android:gravity="center">
 
     <TextView
         android:id="@+id/back_left_text_view"
-        android:text="Back left"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:text="Make toast"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
