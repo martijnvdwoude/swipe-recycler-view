@@ -86,9 +86,10 @@ public class SwipeRecyclerView extends RecyclerView {
         for(int i = 0; i < adapter.getSubAdapterCount(); i++){
             if(adapter.getSubAdapter(i) instanceof SwipeRecyclerViewContentAdapter){
                 SwipeRecyclerViewContentAdapter subAdapter = (SwipeRecyclerViewContentAdapter) adapter.getSubAdapter(i);
-                subAdapter.setBackLeftViewResource(mBackLeftViewResourceId);
-                subAdapter.setBackRightViewResource(mBackRightViewResourceId);
-                subAdapter.setFrontViewResource(mFrontViewResourceId);
+
+                subAdapter.setBackLeftViewResourceId(subAdapter.getBackLeftViewResourceId() != 0 ? subAdapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
+                subAdapter.setBackRightViewResourceId(subAdapter.getBackRightViewResourceId() != 0 ? subAdapter.getBackRightViewResourceId() : mBackRightViewResourceId);
+                subAdapter.setFrontViewResourceId(subAdapter.getFrontViewResourceId() != 0 ? subAdapter.getFrontViewResourceId() : mFrontViewResourceId);
             }
         }
 
@@ -101,9 +102,9 @@ public class SwipeRecyclerView extends RecyclerView {
      * @param adapter
      */
     public void setAdapter(SwipeRecyclerViewContentAdapter adapter) {
-        adapter.setBackLeftViewResource(mFrontViewResourceId);
-        adapter.setBackRightViewResource(mBackRightViewResourceId);
-        adapter.setFrontViewResource(mFrontViewResourceId);
+        adapter.setBackLeftViewResourceId(adapter.getBackLeftViewResourceId() != 0 ? adapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
+        adapter.setBackRightViewResourceId(adapter.getBackRightViewResourceId() != 0 ? adapter.getBackRightViewResourceId() : mBackRightViewResourceId);
+        adapter.setFrontViewResourceId(adapter.getFrontViewResourceId() != 0 ? adapter.getFrontViewResourceId() : mFrontViewResourceId);
 
         super.setAdapter(adapter);
     }

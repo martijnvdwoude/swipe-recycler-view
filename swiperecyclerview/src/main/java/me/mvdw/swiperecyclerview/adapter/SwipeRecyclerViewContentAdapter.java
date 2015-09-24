@@ -13,9 +13,9 @@ import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
  */
 public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder>  {
 
-    private int mBackLeftViewResource;
-    private int mBackRightViewResource;
-    private int mFrontViewResource;
+    private int mBackLeftViewResourceId;
+    private int mBackRightViewResourceId;
+    private int mFrontViewResourceId;
 
     @Override
     public SwipeRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int i) {
@@ -34,16 +34,28 @@ public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapt
         return 0;
     }
 
-    public void setBackLeftViewResource(final int backLeftViewResource){
-        this.mBackLeftViewResource = backLeftViewResource;
+    public void setBackLeftViewResourceId(final int backLeftViewResourceId){
+        this.mBackLeftViewResourceId = backLeftViewResourceId;
     }
 
-    public void setBackRightViewResource(final int backRightViewResource){
-        this.mBackRightViewResource = backRightViewResource;
+    public void setBackRightViewResourceId(final int backRightViewResourceId){
+        this.mBackRightViewResourceId = backRightViewResourceId;
     }
 
-    public void setFrontViewResource(final int frontViewResource){
-        this.mFrontViewResource = frontViewResource;
+    public void setFrontViewResourceId(final int frontViewResourceId){
+        this.mFrontViewResourceId = frontViewResourceId;
+    }
+
+    public int getBackLeftViewResourceId() {
+        return mBackLeftViewResourceId;
+    }
+
+    public int getBackRightViewResourceId() {
+        return mBackRightViewResourceId;
+    }
+
+    public int getFrontViewResourceId() {
+        return mFrontViewResourceId;
     }
 
     /**
@@ -58,9 +70,9 @@ public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapt
 
             mSwipeRecyclerViewRowView = (SwipeRecyclerViewRowView) itemView.findViewById(R.id.swipe_recycler_view_row_view);
 
-            mSwipeRecyclerViewRowView.setFrontViewResourceId(mFrontViewResource);
-            mSwipeRecyclerViewRowView.setBackLeftViewResourceId(mBackLeftViewResource);
-            mSwipeRecyclerViewRowView.setBackRightViewResourceId(mBackRightViewResource);
+            mSwipeRecyclerViewRowView.setFrontViewResourceId(mFrontViewResourceId);
+            mSwipeRecyclerViewRowView.setBackLeftViewResourceId(mBackLeftViewResourceId);
+            mSwipeRecyclerViewRowView.setBackRightViewResourceId(mBackRightViewResourceId);
 
             mSwipeRecyclerViewRowView.initViews();
         }
