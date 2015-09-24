@@ -1,7 +1,7 @@
 # SwipeRecyclerView
 SwipeRecyclerView including a MergeAdapter with header and footer support
 
-Very, very rough first draft of a swipable RecyclerView. Lots of stuff left to implement/clean-up/improve/optimize.
+Rough first draft of a swipable RecyclerView. Lots of stuff left to implement/clean-up/improve/optimize.
 
 ###SwipeRecyclerViewContentAdapter
 Extend this adapter in your project to return views for the swipable rows in your RecyclerView. Simply override `onBindViewHolder` and call `getFrontView()`, `getBackLeftView()`, `getBackRightView()` on the `viewHolder` to get references to the inflated layouts that you set as attributes in your xml on the `SwipeRecyclerView`.
