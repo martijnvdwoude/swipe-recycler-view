@@ -49,11 +49,12 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
 
         // Get recycler view
         swipeRecyclerView = (SwipeRecyclerView) view.findViewById(R.id.swipe_recycler_view);
-        swipeRecyclerView.setCloseInterpolator(new FastOutSlowInInterpolator());
+        swipeRecyclerView.setCloseRowInterpolator(new FastOutSlowInInterpolator());
 
         // Set layoutmanager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         swipeRecyclerView.setLayoutManager(layoutManager);
+        swipeRecyclerView.setHasFixedSize(false);
 
         // New merge adapter
         mergeAdapter = new SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter>();
@@ -64,6 +65,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerViewAdapter = new ExampleSwipeRecyclerViewContentAdapter(getActivity());
         swipeRecyclerViewAdapter.setData(swipeRecyclerViewItems);
         swipeRecyclerViewAdapter.setListener(this);
+        swipeRecyclerViewAdapter.setFrontViewTranslationObservableEnabled(true);
 
         // Add content adapter to merge adapter
         mergeAdapter.addAdapter(swipeRecyclerViewAdapter);

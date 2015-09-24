@@ -6,7 +6,7 @@
     android:background="@android:color/holo_red_light">
 
     <TextView
-        android:id="@+id/back_left_text_view"
+        android:id="@+id/back_right_text_view"
         android:text="Delete"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

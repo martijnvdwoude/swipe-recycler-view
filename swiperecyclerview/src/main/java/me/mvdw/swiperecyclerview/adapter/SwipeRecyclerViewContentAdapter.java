@@ -5,17 +5,30 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import me.mvdw.swiperecyclerview.R;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder>  {
+public class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder> {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
     private int mFrontViewResourceId;
+
+    private boolean mEnableFrontViewTranslationObservable;
+    private FrontViewTranslationObservable frontViewTranslationObservable = new FrontViewTranslationObservable();
+
+    public static class FrontViewTranslationObservable extends Observable {
+        public void frontViewTranslationChanged(ViewGroup frontView){
+            setChanged();
+            notifyObservers(frontView);
+        }
+    }
 
     @Override
     public SwipeRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int i) {
@@ -59,9 +72,33 @@ public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapt
     }
 
     /**
+     * Getters/setters for the front view observable
+     */
+    public void setFrontViewTranslationObservableEnabled(boolean enableFrontViewTranslationObservable) {
+        this.mEnableFrontViewTranslationObservable = enableFrontViewTranslationObservable;
+    }
+
+    public boolean isFrontViewTranslationObservableEnabled() {
+        return mEnableFrontViewTranslationObservable;
+    }
+
+    public FrontViewTranslationObservable getFrontViewTranslationObservable(){
+        return frontViewTranslationObservable;
+    }
+
+    /**
+     * Override this method to update the content of the row according to the X translation
+     * of the front view. This can be used to do parallax effects or motion based animations.
+     *
+     * @param viewHolder reference to the viewHolder of the swiping row
+     * @param frontViewTranslationX the X translation value of the front view
+     */
+    protected void onFrontViewTranslationChanged(SwipeRecyclerViewHolder viewHolder, float frontViewTranslationX){}
+
+    /**
      * Viewholder
      */
-    public class SwipeRecyclerViewHolder extends RecyclerView.ViewHolder {
+    public class SwipeRecyclerViewHolder extends RecyclerView.ViewHolder implements Observer {
 
         private SwipeRecyclerViewRowView mSwipeRecyclerViewRowView;
 
@@ -75,6 +112,9 @@ public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapt
             mSwipeRecyclerViewRowView.setBackRightViewResourceId(mBackRightViewResourceId);
 
             mSwipeRecyclerViewRowView.initViews();
+
+            if(mEnableFrontViewTranslationObservable)
+                frontViewTranslationObservable.addObserver(this);
         }
 
         public void bindItem() {
@@ -91,6 +131,13 @@ public abstract class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapt
 
         public ViewGroup getFrontView(){
             return mSwipeRecyclerViewRowView.getFrontView();
+        }
+
+        @Override
+        public void update(Observable observable, Object frontView) {
+            if(frontView == getFrontView()) {
+                onFrontViewTranslationChanged(this, this.getFrontView().getTranslationX());
+            }
         }
     }
 }

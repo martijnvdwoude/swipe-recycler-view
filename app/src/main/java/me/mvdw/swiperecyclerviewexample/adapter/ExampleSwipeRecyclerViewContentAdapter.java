@@ -89,4 +89,10 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
     public void setListener(ExampleSwipeRecyclerViewContentAdapterListener listener){
         this.mListener = listener;
     }
+
+    @Override
+    protected void onFrontViewTranslationChanged(final SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder viewHolder, float frontViewTranslationX){
+        // Little parallax effect example
+        viewHolder.getBackRightView().findViewById(R.id.back_right_text_view).setTranslationX(frontViewTranslationX / 5);
+    }
 }

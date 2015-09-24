@@ -1,7 +1,9 @@
 package me.mvdw.swiperecyclerview.view;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -11,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewContentAdapter;
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
@@ -37,7 +40,7 @@ public class SwipeRecyclerView extends RecyclerView {
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
 
-    private TimeInterpolator mCloseInterpolator;
+    private TimeInterpolator mCloseRowInterpolator;
 
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
@@ -200,11 +203,13 @@ public class SwipeRecyclerView extends RecyclerView {
                 // Put translation on frontview, following finger
                 if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop) {
                     mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
+                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
                     // Return false to prevent scrolling while swiping open row
                     return false;
                 } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop) {
                     mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
+                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
                     // Return false to prevent scrolling while swiping open row
                     return false;
@@ -327,7 +332,7 @@ public class SwipeRecyclerView extends RecyclerView {
     }
 
     /**
-     * Preliminary animation methods
+     * Private animation methods
      *
      */
     private void openBackLeftView(int animationDuration){
@@ -338,6 +343,12 @@ public class SwipeRecyclerView extends RecyclerView {
                 "translationX",
                 mOpenedRowView.getFrontView().getTranslationX(),
                 0f + mOpenedRowView.getBackLeftView().getWidth());
+
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+            }
+        });
 
         anim.setDuration(animationDuration);
         anim.start();
@@ -352,6 +363,12 @@ public class SwipeRecyclerView extends RecyclerView {
                 mOpenedRowView.getFrontView().getTranslationX(),
                 0f - mOpenedRowView.getBackRightView().getWidth());
 
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            public void onAnimationUpdate(ValueAnimator animation) {
+                updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+            }
+        });
+
         anim.setDuration(animationDuration);
         anim.start();
     }
@@ -364,6 +381,10 @@ public class SwipeRecyclerView extends RecyclerView {
      * Public methods
      *
      */
+    public void setCloseRowInterpolator(TimeInterpolator closeInterpolator){
+        this.mCloseRowInterpolator = closeInterpolator;
+    }
+
     public boolean hasOpenedItem(){
         return mOpenStatus != OpenStatus.CLOSED;
     }
@@ -371,40 +392,88 @@ public class SwipeRecyclerView extends RecyclerView {
     public void closeOpenedItem(){
         mOpenStatus = OpenStatus.CLOSED;
 
+        ObjectAnimator anim = new ObjectAnimator();
+
         if(mOpenedRowView != null) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(
+            anim = ObjectAnimator.ofFloat(
                     mOpenedRowView.getFrontView(),
                     "translationX",
                     mOpenedRowView.getFrontView().getTranslationX(),
                     0f);
 
-            anim.setDuration(300);
-
-            if(mCloseInterpolator != null) {
-                anim.setInterpolator(mCloseInterpolator);
-            }
-
-            anim.start();
+            // Update the front view translation observable during updates of the animation
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                }
+            });
         } else if(mTouchedRowView != null) {
-            ObjectAnimator anim = ObjectAnimator.ofFloat(
+            anim = ObjectAnimator.ofFloat(
                     mTouchedRowView.getFrontView(),
                     "translationX",
                     mTouchedRowView.getFrontView().getTranslationX(),
                     0f);
 
-            anim.setDuration(300);
-
-            if(mCloseInterpolator != null) {
-                anim.setInterpolator(mCloseInterpolator);
-            }
-
-            anim.start();
+            // TODO: fix - mTouchedRowView is null here because its set to null in ACTION_UP
+            // Update the front view translation observable during updates of the animation
+//            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+//                public void onAnimationUpdate(ValueAnimator animation) {
+//                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+//                }
+//            });
         }
 
-        mOpenedRowView = null;
+        // Add animator listener to set the opened row to null only when the animation ends
+        anim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mOpenedRowView = null;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                mOpenedRowView = null;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+
+        anim.setDuration(300);
+
+        if(mCloseRowInterpolator != null) {
+            anim.setInterpolator(mCloseRowInterpolator);
+        }
+
+        anim.start();
     }
 
-    public void setCloseInterpolator(TimeInterpolator closeInterpolator){
-        this.mCloseInterpolator = closeInterpolator;
+    /**
+     * Update front view translation observables for all adapters that have it enabled
+     * and pass the swiping front view to the observables
+     */
+    private void updateFrontViewTranslationObservables(ViewGroup frontView){
+        Adapter adapter = getAdapter();
+
+        if(adapter instanceof SwipeRecyclerViewContentAdapter){
+            if(((SwipeRecyclerViewContentAdapter) adapter).isFrontViewTranslationObservableEnabled())
+                ((SwipeRecyclerViewContentAdapter) adapter).getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
+        } else if(adapter instanceof SwipeRecyclerViewMergeAdapter){
+            for(int i = 0; i < ((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapterCount(); i++){
+                if(((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i) instanceof SwipeRecyclerViewContentAdapter){
+                    SwipeRecyclerViewContentAdapter subAdapter = (SwipeRecyclerViewContentAdapter) ((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i);
+
+                    if(subAdapter.isFrontViewTranslationObservableEnabled())
+                        subAdapter.getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
+                }
+            }
+        }
     }
 }
