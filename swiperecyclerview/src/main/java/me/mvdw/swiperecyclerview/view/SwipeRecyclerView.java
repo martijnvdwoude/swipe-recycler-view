@@ -255,8 +255,10 @@ public class SwipeRecyclerView extends RecyclerView {
                                     if(Math.abs(mDeltaX) < mTouchedRowView.getBackRightView().getWidth()
                                             && mVelocityX >= mMinFlingVelocity) {
                                         openBackRightView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
+                                        mTouchedRowView = null;
                                     } else {
                                         openBackRightView(300);
+                                        mTouchedRowView = null;
                                     }
                                 } else {
                                     closeOpenedItem();
@@ -273,8 +275,10 @@ public class SwipeRecyclerView extends RecyclerView {
                                     if(mDeltaX < mTouchedRowView.getBackLeftView().getWidth()
                                             && mVelocityX >= mMinFlingVelocity) {
                                         openBackLeftView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
+                                        mTouchedRowView = null;
                                     } else {
                                         openBackLeftView(300);
+                                        mTouchedRowView = null;
                                     }
                                 } else {
                                     closeOpenedItem();
@@ -288,6 +292,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                 // Swiped to the right
                                 // Animate view back to where it was
                                 openBackLeftView(300);
+                                mTouchedRowView = null;
                             } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // If swiped with enough velocity
@@ -297,6 +302,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                 } else {
                                     // Animate view back to where it was
                                     openBackLeftView(300);
+                                    mTouchedRowView = null;
                                 }
                             } else {
                                 // If clicking and no movement, just close the opened row
@@ -310,6 +316,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                 // Swiped to the left
                                 // Animate view back to where it was
                                 openBackRightView(300);
+                                mTouchedRowView = null;
                             } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
@@ -320,6 +327,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                 } else {
                                     // Animate view back to where it was
                                     openBackRightView(300);
+                                    mTouchedRowView = null;
                                 }
                             } else {
                                 // If clicking and no movement, just close the opened row
@@ -330,7 +338,6 @@ public class SwipeRecyclerView extends RecyclerView {
                     }
                 }
 
-                mTouchedRowView = null;
                 mDeltaX = 0;
 
                 break;
@@ -470,13 +477,12 @@ public class SwipeRecyclerView extends RecyclerView {
                     mTouchedRowView.getFrontView().getTranslationX(),
                     0f);
 
-            // TODO: fix - mTouchedRowView is null here because its set to null in ACTION_UP
             // Update the front view translation observable during updates of the animation
-//            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-//                public void onAnimationUpdate(ValueAnimator animation) {
-//                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
-//                }
-//            });
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                }
+            });
         }
 
         // Add animator listener to set the opened row to null only when the animation ends
@@ -489,12 +495,14 @@ public class SwipeRecyclerView extends RecyclerView {
             @Override
             public void onAnimationEnd(Animator animator) {
                 mOpenedRowView = null;
+                mTouchedRowView = null;
                 mIsAnimating = false;
             }
 
             @Override
             public void onAnimationCancel(Animator animator) {
                 mOpenedRowView = null;
+                mTouchedRowView = null;
                 mIsAnimating = false;
             }
 
