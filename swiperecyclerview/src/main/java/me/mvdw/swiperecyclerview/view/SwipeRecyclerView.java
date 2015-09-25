@@ -27,11 +27,11 @@ public class SwipeRecyclerView extends RecyclerView {
     private SwipeRecyclerViewRowView mOpenedRowView;
 
     private float startX = 0;
-    private float mVelocityX = 0;
-    private float mDeltaX = 0;
+    private float startY = 0;
     private float mTouchedRowViewTranslationX;
 
     private VelocityTracker mVelocityTracker;
+    private float mVelocityX = 0;
     private int mTouchSlop;
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
@@ -125,7 +125,8 @@ public class SwipeRecyclerView extends RecyclerView {
         switch (motionEvent.getActionMasked()){
             case MotionEvent.ACTION_DOWN:
 
-                startX = motionEvent.getRawX();
+                startX = motionEvent.getX();
+                startY = motionEvent.getY();
 
                 Rect rect = new Rect();
                 int childCount = this.getChildCount();
@@ -142,7 +143,6 @@ public class SwipeRecyclerView extends RecyclerView {
                     if (rect.contains(x, y)) {
                         // Save the touched row and pass the event to the row
                         mTouchedRowView = ((SwipeRecyclerViewRowView) child);
-                        mDeltaX = 0;
 
                         mTouchedRowViewTranslationX = mTouchedRowView.getFrontView().getTranslationX();
 
@@ -187,9 +187,11 @@ public class SwipeRecyclerView extends RecyclerView {
                 }
 
             case MotionEvent.ACTION_MOVE:
-                mDeltaX = calculateDeltaX(motionEvent);
+                float deltaX = calculateDeltaX(motionEvent);
+                float deltaY = calculateDeltaY(motionEvent);
 
-                return Math.abs(mDeltaX) > mTouchSlop;
+                return Math.abs(deltaX) > mTouchSlop
+                        || Math.abs(deltaY) > mTouchSlop;
         }
 
         return false;
@@ -197,13 +199,14 @@ public class SwipeRecyclerView extends RecyclerView {
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
-        switch (motionEvent.getActionMasked()){
+        // Measure moved distance by finger
+        float deltaX = calculateDeltaX(motionEvent);
+        float deltaY = calculateDeltaY(motionEvent);
+
+        switch (motionEvent.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
 
                 if(!mIsAnimating && mTouchedRowView != null) {
-                    // Measure moved distance by finger
-                    mDeltaX = calculateDeltaX(motionEvent);
-
                     // Measure velocity
                     mVelocityTracker.addMovement(motionEvent);
                     mVelocityTracker.computeCurrentVelocity(1000);
@@ -211,17 +214,17 @@ public class SwipeRecyclerView extends RecyclerView {
                     mVelocityX = Math.abs(velocityX);
 
                     // Put translation on frontview, following finger
-                    if (mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop) {
+                    if (deltaX > 0 && Math.abs(deltaX) > mTouchSlop) {
                         mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
                         updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
-                        // Return false to prevent scrolling vertical scrolling of the recyclerview while swiping open row
+                        // Return false to prevent vertical scrolling of the recyclerview while swiping open row
                         return false;
-                    } else if (mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop) {
+                    } else if (deltaX < 0 && Math.abs(deltaX) > mTouchSlop) {
                         mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
                         updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
-                        // Return false to prevent scrolling vertical scrolling of the recyclerview while swiping open row
+                        // Return false to prevent vertical scrolling of the recyclerview while swiping open row
                         return false;
                     }
 
@@ -245,7 +248,7 @@ public class SwipeRecyclerView extends RecyclerView {
                     switch(mOpenStatus){
 
                         case CLOSED:
-                            if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // If swiped with enough velocity
                                 // Or swiped past half of the back view
@@ -254,7 +257,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                     mOpenedRowView = mTouchedRowView;
                                     float distanceToTravel = mTouchedRowView.getBackRightView().getWidth() - Math.abs(mTouchedRowView.getFrontView().getTranslationX());
 
-                                    if(Math.abs(mDeltaX) < mTouchedRowView.getBackRightView().getWidth()
+                                    if(Math.abs(deltaX) < mTouchedRowView.getBackRightView().getWidth()
                                             && mVelocityX >= mMinFlingVelocity) {
                                         openBackRightView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
                                         mTouchedRowView = null;
@@ -265,7 +268,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                 } else {
                                     closeOpenedItem();
                                 }
-                            } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
                                 // Or swiped past half of the back view
@@ -274,7 +277,7 @@ public class SwipeRecyclerView extends RecyclerView {
                                     mOpenedRowView = mTouchedRowView;
                                     float distanceToTravel = mTouchedRowView.getBackLeftView().getWidth() - mTouchedRowView.getFrontView().getTranslationX();
 
-                                    if(mDeltaX < mTouchedRowView.getBackLeftView().getWidth()
+                                    if(deltaX < mTouchedRowView.getBackLeftView().getWidth()
                                             && mVelocityX >= mMinFlingVelocity) {
                                         openBackLeftView(getAnimationDurationForVelocity(mVelocityX, distanceToTravel));
                                         mTouchedRowView = null;
@@ -290,12 +293,12 @@ public class SwipeRecyclerView extends RecyclerView {
                             break;
 
                         case LEFT:
-                            if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // Animate view back to where it was
                                 openBackLeftView(300);
                                 mTouchedRowView = null;
-                            } else if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            } else if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // If swiped with enough velocity
                                 if (mVelocityX >= mMinFlingVelocity
@@ -314,12 +317,12 @@ public class SwipeRecyclerView extends RecyclerView {
                             break;
 
                         case RIGHT:
-                            if(mDeltaX < 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // Animate view back to where it was
                                 openBackRightView(300);
                                 mTouchedRowView = null;
-                            } else if(mDeltaX > 0 && Math.abs(mDeltaX) > mTouchSlop){
+                            } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
                                 // Or swiped past half of the back view
@@ -340,8 +343,6 @@ public class SwipeRecyclerView extends RecyclerView {
                     }
                 }
 
-                mDeltaX = 0;
-
                 break;
         }
 
@@ -350,6 +351,10 @@ public class SwipeRecyclerView extends RecyclerView {
 
     private float calculateDeltaX(MotionEvent motionEvent){
         return motionEvent.getX() - startX;
+    }
+
+    private float calculateDeltaY(MotionEvent motionEvent){
+        return motionEvent.getY() - startY;
     }
 
     /**
