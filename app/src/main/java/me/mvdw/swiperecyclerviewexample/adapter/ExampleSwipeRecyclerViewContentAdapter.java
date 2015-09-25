@@ -96,8 +96,14 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
         LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
         TextView backRightTextView = (TextView) backRightView.findViewById(R.id.back_right_text_view);
 
-        if(Math.abs(frontViewTranslationX) < backRightView.getWidth()) {
-            backRightTextView.setTranslationX(frontViewTranslationX / 5 + backRightTextView.getWidth() / 2);
+        float backRightViewTranslationX;
+
+        if(Math.abs(frontViewTranslationX) >= backRightView.getWidth()) {
+            backRightViewTranslationX = 0;
+        } else {
+            backRightViewTranslationX = frontViewTranslationX / 5 + backRightTextView.getWidth() / 2;
         }
+
+        backRightTextView.setTranslationX(backRightViewTranslationX);
     }
 }
