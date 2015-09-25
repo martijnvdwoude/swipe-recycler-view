@@ -187,7 +187,9 @@ public class SwipeRecyclerView extends RecyclerView {
                 }
 
             case MotionEvent.ACTION_MOVE:
-                return true;
+                mDeltaX = calculateDeltaX(motionEvent);
+
+                return Math.abs(mDeltaX) > mTouchSlop;
         }
 
         return false;

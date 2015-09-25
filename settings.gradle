@@ -1,1 +1,1 @@
-include ':app', ':swiperecyclerview'
+include ':swiperecyclerview-example', ':swiperecyclerview'
