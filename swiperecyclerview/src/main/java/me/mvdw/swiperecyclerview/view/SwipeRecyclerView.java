@@ -207,30 +207,31 @@ public class SwipeRecyclerView extends RecyclerView {
             case MotionEvent.ACTION_MOVE:
 
                 if(!mIsAnimating && mTouchedRowView != null) {
-                    // Measure velocity
-                    mVelocityTracker.addMovement(motionEvent);
-                    mVelocityTracker.computeCurrentVelocity(1000);
-                    float velocityX = mVelocityTracker.getXVelocity();
-                    mVelocityX = Math.abs(velocityX);
-
-                    // Put translation on frontview, following finger
-                    if (deltaX > 0 && Math.abs(deltaX) > mTouchSlop) {
-                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
-                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
-
-                        // Return false to prevent vertical scrolling of the recyclerview while swiping open row
+                    if(Math.abs(deltaY) > mTouchSlop && Math.abs(mTouchedRowView.getFrontView().getTranslationX()) == 0){
+                        break;
+                    } else if(Math.abs(deltaY) > mTouchSlop && Math.abs(mTouchedRowView.getFrontView().getTranslationX()) > 0
+                            && Math.abs(deltaX) < mTouchSlop) {
                         return false;
-                    } else if (deltaX < 0 && Math.abs(deltaX) > mTouchSlop) {
-                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
-                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                    } else {
+                        // Measure velocity
+                        mVelocityTracker.addMovement(motionEvent);
+                        mVelocityTracker.computeCurrentVelocity(1000);
+                        float velocityX = mVelocityTracker.getXVelocity();
+                        mVelocityX = Math.abs(velocityX);
 
-                        // Return false to prevent vertical scrolling of the recyclerview while swiping open row
-                        return false;
-                    }
+                        if (deltaX > 0 && Math.abs(deltaX) > mTouchSlop) {
+                            mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
+                            updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
 
-                    // If a row is open, prevent vertical scrolling of the recyclerview
-                    if (mOpenStatus != OpenStatus.CLOSED) {
-                        return false;
+                            // Return false to prevent vertical scrolling of the recyclerview while swiping open row
+                            return false;
+                        } else if (deltaX < 0 && Math.abs(deltaX) > mTouchSlop) {
+                            mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
+                            updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+
+                            // Return false to prevent vertical scrolling of the recyclerview while swiping open row
+                            return false;
+                        }
                     }
                 } else {
                     mTouchedRowView = null;
