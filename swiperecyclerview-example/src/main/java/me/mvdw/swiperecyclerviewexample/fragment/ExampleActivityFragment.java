@@ -54,12 +54,12 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         // Set layoutmanager
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         swipeRecyclerView.setLayoutManager(layoutManager);
-        swipeRecyclerView.setHasFixedSize(false);
+        swipeRecyclerView.setHasFixedSize(true);
 
         // New merge adapter
-        mergeAdapter = new SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter>();
-        mergeAdapter.setHideHeadersForEmptyContent(true);
-        mergeAdapter.setHideFootersForEmptyContent(true);
+//        mergeAdapter = new SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter>();
+//        mergeAdapter.setHideHeadersForEmptyContent(true);
+//        mergeAdapter.setHideFootersForEmptyContent(true);
 
         // New content adapter
         swipeRecyclerViewAdapter = new ExampleSwipeRecyclerViewContentAdapter(getActivity());
@@ -68,7 +68,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerViewAdapter.setFrontViewTranslationObservableEnabled(true);
 
         // Add content adapter to merge adapter
-        mergeAdapter.addAdapter(swipeRecyclerViewAdapter);
+//        mergeAdapter.addAdapter(swipeRecyclerViewAdapter);
 
         // New footer view
 //        mergeAdapter.addFooterView(mFooter);
@@ -77,10 +77,10 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
 //        mergeAdapter.addHeaderView(mHeader);
 
         // Set merge adapter to recyclerview
-        swipeRecyclerView.setAdapter(mergeAdapter);
+//        swipeRecyclerView.setAdapter(mergeAdapter);
 
         // Or set regular content adapter
-//        swipeRecyclerView.setAdapter(swipeRecyclerViewAdapter);
+        swipeRecyclerView.setAdapter(swipeRecyclerViewAdapter);
     }
 
     public void addItem(){
@@ -94,14 +94,16 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
 
             swipeRecyclerViewItems.add(0, newItem);
 
-            mergeAdapter.notifyItemInserted(swipeRecyclerViewAdapter, 0);
+//            mergeAdapter.notifyItemInserted(swipeRecyclerViewAdapter, 0);
+            swipeRecyclerViewAdapter.notifyItemInserted(0);
         }
     }
 
     @Override
     public void onDeleteClicked(int position) {
-        swipeRecyclerViewItems.remove(mergeAdapter.getLocalPosition(position));
-        mergeAdapter.notifyItemRemoved(swipeRecyclerViewAdapter, position);
+        swipeRecyclerViewItems.remove(position);
+//        mergeAdapter.notifyItemRemoved(swipeRecyclerViewAdapter, position);
+        swipeRecyclerViewAdapter.notifyItemRemoved(position);
 
         swipeRecyclerView.closeOpenedItem();
     }

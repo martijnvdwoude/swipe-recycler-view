@@ -23,12 +23,9 @@ import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
  */
 public class SwipeRecyclerView extends RecyclerView {
 
-    private SwipeRecyclerViewRowView mTouchedRowView;
-    private SwipeRecyclerViewRowView mOpenedRowView;
-
-    private float startX = 0;
-    private float startY = 0;
-    private float mTouchedRowViewTranslationX;
+    private int mFrontViewResourceId;
+    private int mBackLeftViewResourceId;
+    private int mBackRightViewResourceId;
 
     private VelocityTracker mVelocityTracker;
     private float mVelocityX = 0;
@@ -36,13 +33,17 @@ public class SwipeRecyclerView extends RecyclerView {
     private int mMinFlingVelocity;
     private int mMaxFlingVelocity;
 
-    private int mFrontViewResourceId;
-    private int mBackLeftViewResourceId;
-    private int mBackRightViewResourceId;
+    private SwipeRecyclerViewRowView mTouchedRowView;
+    private SwipeRecyclerViewRowView mOpenedRowView;
+
+    private float startX = 0;
+    private float mTouchedRowViewTranslationX;
 
     private TimeInterpolator mCloseRowInterpolator;
 
     private boolean mIsAnimating;
+    private boolean mIsSwiping;
+    private boolean mFrontViewClicked;
 
     private OpenStatus mOpenStatus = OpenStatus.CLOSED;
 
@@ -121,12 +122,19 @@ public class SwipeRecyclerView extends RecyclerView {
      * @return
      */
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+        // Measure moved distance by finger
+        float deltaX = calculateDeltaX(motionEvent);
+
         switch (motionEvent.getActionMasked()){
+
             case MotionEvent.ACTION_DOWN:
 
+                mIsSwiping = false;
+                mFrontViewClicked = false;
+
+                // Set position of touch event
                 startX = motionEvent.getX();
-                startY = motionEvent.getY();
 
                 Rect rect = new Rect();
                 int childCount = this.getChildCount();
@@ -144,97 +152,111 @@ public class SwipeRecyclerView extends RecyclerView {
                         // Save the touched row and pass the event to the row
                         mTouchedRowView = ((SwipeRecyclerViewRowView) child);
 
+                        // Save translation of touched row
                         mTouchedRowViewTranslationX = mTouchedRowView.getFrontView().getTranslationX();
+                    }
+                }
 
-                        if(mOpenStatus != OpenStatus.CLOSED
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+
+                if(!mIsAnimating && mTouchedRowView != null) {
+                    // Measure velocity
+                    mVelocityTracker.addMovement(motionEvent);
+                    mVelocityTracker.computeCurrentVelocity(1000);
+                    float velocityX = mVelocityTracker.getXVelocity();
+                    mVelocityX = Math.abs(velocityX);
+
+                    // Make front view follow position of the finger only if view is not scrolling
+                    if (deltaX > 0 && Math.abs(deltaX) > mTouchSlop
+                            && getScrollState() == SCROLL_STATE_IDLE) {
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
+                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+
+                        mIsSwiping = true;
+                    } else if (deltaX < 0 && Math.abs(deltaX) > mTouchSlop
+                            && getScrollState() == SCROLL_STATE_IDLE) {
+                        mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
+                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+
+                        mIsSwiping = true;
+                    }
+                }
+
+                break;
+        }
+
+        return super.dispatchTouchEvent(motionEvent);
+    }
+
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent motionEvent) {
+        float deltaX = calculateDeltaX(motionEvent);
+
+        switch (motionEvent.getActionMasked()){
+
+            case MotionEvent.ACTION_DOWN:
+
+                Rect rect = new Rect();
+                int childCount = this.getChildCount();
+                int[] listViewCoords = new int[2];
+                this.getLocationOnScreen(listViewCoords);
+                int x = (int) motionEvent.getRawX() - listViewCoords[0];
+                int y = (int) motionEvent.getRawY() - listViewCoords[1];
+                View child;
+
+                for (int i = 0; i < childCount; i++) {
+                    child = this.getChildAt(i);
+                    child.getHitRect(rect);
+
+                    if (rect.contains(x, y)) {
+                        if(mOpenStatus == OpenStatus.CLOSED) {
+                            mVelocityTracker = VelocityTracker.obtain();
+                        } else if(mOpenStatus != OpenStatus.CLOSED
                                 && mTouchedRowView != mOpenedRowView) {
                             closeOpenedItem();
 
                             return true;
-                        } else if(mOpenStatus != OpenStatus.CLOSED){
+                        } else if(mOpenStatus != OpenStatus.CLOSED) {
                             // Get hit rects of back views
                             Rect backLeftRect = new Rect();
 
-                            if(((SwipeRecyclerViewRowView) child).getBackLeftView() != null) {
+                            if (((SwipeRecyclerViewRowView) child).getBackLeftView() != null) {
                                 ((SwipeRecyclerViewRowView) child).getBackLeftView().getHitRect(backLeftRect);
                             }
 
                             Rect backRightRect = new Rect();
 
-                            if(((SwipeRecyclerViewRowView) child).getBackRightView() != null) {
+                            if (((SwipeRecyclerViewRowView) child).getBackRightView() != null) {
                                 ((SwipeRecyclerViewRowView) child).getBackRightView().getHitRect(backRightRect);
                             }
 
                             // If a click happens in the hit rects of the back views while the row is open, pass the event to the row
-                            if(mOpenStatus == OpenStatus.LEFT
+                            if (mOpenStatus == OpenStatus.LEFT
                                     && backLeftRect.contains(x, 0)
-                                    && mTouchedRowView == mOpenedRowView){
+                                    && mTouchedRowView == mOpenedRowView) {
+
                                 return false;
-                            } else if(mOpenStatus == OpenStatus.RIGHT
+                            } else if (mOpenStatus == OpenStatus.RIGHT
                                     && backRightRect.contains(x, 0)
-                                    && mTouchedRowView == mOpenedRowView){
+                                    && mTouchedRowView == mOpenedRowView) {
+
                                 return false;
+                            } else {
+                                mFrontViewClicked = true;
                             }
-
-                            return true;
-
-                        } else {
-                            mVelocityTracker = VelocityTracker.obtain();
-
-                            return false;
                         }
                     }
                 }
 
-            case MotionEvent.ACTION_MOVE:
-                float deltaX = calculateDeltaX(motionEvent);
-                float deltaY = calculateDeltaY(motionEvent);
+                break;
 
-                return Math.abs(deltaX) > mTouchSlop
-                        || Math.abs(deltaY) > mTouchSlop;
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
-        // Measure moved distance by finger
-        float deltaX = calculateDeltaX(motionEvent);
-        float deltaY = calculateDeltaY(motionEvent);
-
-        switch (motionEvent.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
 
-                if(!mIsAnimating && mTouchedRowView != null) {
-                    if(Math.abs(deltaY) > mTouchSlop && Math.abs(mTouchedRowView.getFrontView().getTranslationX()) == 0){
-                        break;
-                    } else if(Math.abs(deltaY) > mTouchSlop && Math.abs(mTouchedRowView.getFrontView().getTranslationX()) > 0
-                            && Math.abs(deltaX) < mTouchSlop) {
-                        return false;
-                    } else {
-                        // Measure velocity
-                        mVelocityTracker.addMovement(motionEvent);
-                        mVelocityTracker.computeCurrentVelocity(1000);
-                        float velocityX = mVelocityTracker.getXVelocity();
-                        mVelocityX = Math.abs(velocityX);
-
-                        if (deltaX > 0 && Math.abs(deltaX) > mTouchSlop) {
-                            mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX - mTouchSlop);
-                            updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
-
-                            // Return false to prevent vertical scrolling of the recyclerview while swiping open row
-                            return false;
-                        } else if (deltaX < 0 && Math.abs(deltaX) > mTouchSlop) {
-                            mTouchedRowView.getFrontView().setTranslationX(motionEvent.getRawX() + mTouchedRowViewTranslationX - startX + mTouchSlop);
-                            updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
-
-                            // Return false to prevent vertical scrolling of the recyclerview while swiping open row
-                            return false;
-                        }
-                    }
-                } else {
-                    mTouchedRowView = null;
+                // Prevent scrolling if row is swiping open or a row is already open
+                if(mIsSwiping || hasOpenedItem()){
                     return false;
                 }
 
@@ -242,10 +264,11 @@ public class SwipeRecyclerView extends RecyclerView {
 
             case MotionEvent.ACTION_UP:
 
+                mIsSwiping = false;
+
                 mTouchedRowViewTranslationX = 0;
 
-                // If there is a touched view
-                if(mTouchedRowView != null){
+                if(mTouchedRowView != null && getScrollState() == SCROLL_STATE_IDLE){
                     switch(mOpenStatus){
 
                         case CLOSED:
@@ -269,6 +292,8 @@ public class SwipeRecyclerView extends RecyclerView {
                                 } else {
                                     closeOpenedItem();
                                 }
+
+                                return true;
                             } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
@@ -289,6 +314,8 @@ public class SwipeRecyclerView extends RecyclerView {
                                 } else {
                                     closeOpenedItem();
                                 }
+
+                                return true;
                             }
 
                             break;
@@ -299,6 +326,10 @@ public class SwipeRecyclerView extends RecyclerView {
                                 // Animate view back to where it was
                                 openBackLeftView(300);
                                 mTouchedRowView = null;
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             } else if(deltaX < 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the left
                                 // If swiped with enough velocity
@@ -310,9 +341,17 @@ public class SwipeRecyclerView extends RecyclerView {
                                     openBackLeftView(300);
                                     mTouchedRowView = null;
                                 }
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             } else {
                                 // If clicking and no movement, just close the opened row
                                 closeOpenedItem();
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             }
 
                             break;
@@ -323,6 +362,10 @@ public class SwipeRecyclerView extends RecyclerView {
                                 // Animate view back to where it was
                                 openBackRightView(300);
                                 mTouchedRowView = null;
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             } else if(deltaX > 0 && Math.abs(deltaX) > mTouchSlop){
                                 // Swiped to the right
                                 // If swiped with enough velocity
@@ -335,9 +378,17 @@ public class SwipeRecyclerView extends RecyclerView {
                                     openBackRightView(300);
                                     mTouchedRowView = null;
                                 }
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             } else {
                                 // If clicking and no movement, just close the opened row
                                 closeOpenedItem();
+
+                                if(mFrontViewClicked){
+                                    return true;
+                                }
                             }
 
                             break;
@@ -347,15 +398,11 @@ public class SwipeRecyclerView extends RecyclerView {
                 break;
         }
 
-        return super.onTouchEvent(motionEvent);
+        return super.onInterceptTouchEvent(motionEvent);
     }
 
     private float calculateDeltaX(MotionEvent motionEvent){
         return motionEvent.getX() - startX;
-    }
-
-    private float calculateDeltaY(MotionEvent motionEvent){
-        return motionEvent.getY() - startY;
     }
 
     /**
@@ -520,12 +567,11 @@ public class SwipeRecyclerView extends RecyclerView {
             }
         });
 
-        anim.setDuration(300);
-
         if(mCloseRowInterpolator != null) {
             anim.setInterpolator(mCloseRowInterpolator);
         }
 
+        anim.setDuration(300);
         anim.start();
     }
 
