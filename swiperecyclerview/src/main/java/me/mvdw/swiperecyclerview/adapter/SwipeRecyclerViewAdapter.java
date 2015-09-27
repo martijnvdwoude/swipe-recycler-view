@@ -14,7 +14,7 @@ import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder> {
+public class SwipeRecyclerViewAdapter extends RecyclerView.Adapter<SwipeRecyclerViewAdapter.ViewHolder> {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
@@ -31,14 +31,14 @@ public class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeR
     }
 
     @Override
-    public SwipeRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int i) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.swipe_recycler_view_item, parent, false);
-        return new SwipeRecyclerViewHolder(view);
+        return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(SwipeRecyclerViewHolder viewHolder, int i) {
+    public void onBindViewHolder(ViewHolder viewHolder, int i) {
         viewHolder.bindItem();
     }
 
@@ -93,16 +93,16 @@ public class SwipeRecyclerViewContentAdapter extends RecyclerView.Adapter<SwipeR
      * @param viewHolder reference to the viewHolder of the swiping row
      * @param frontViewTranslationX the X translation value of the front view
      */
-    protected void onFrontViewTranslationChanged(SwipeRecyclerViewHolder viewHolder, float frontViewTranslationX){}
+    protected void onFrontViewTranslationChanged(ViewHolder viewHolder, float frontViewTranslationX){}
 
     /**
      * Viewholder
      */
-    public class SwipeRecyclerViewHolder extends RecyclerView.ViewHolder implements Observer {
+    public class ViewHolder extends RecyclerView.ViewHolder implements Observer {
 
         private SwipeRecyclerViewRowView mSwipeRecyclerViewRowView;
 
-        public SwipeRecyclerViewHolder(View itemView) {
+        public ViewHolder(View itemView) {
             super(itemView);
 
             mSwipeRecyclerViewRowView = (SwipeRecyclerViewRowView) itemView.findViewById(R.id.swipe_recycler_view_row_view);

@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 
-import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewContentAdapter;
+import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewAdapter;
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
 
 /**
@@ -90,8 +90,8 @@ public class SwipeRecyclerView extends RecyclerView {
      */
     public void setAdapter(SwipeRecyclerViewMergeAdapter adapter) {
         for(int i = 0; i < adapter.getSubAdapterCount(); i++){
-            if(adapter.getSubAdapter(i) instanceof SwipeRecyclerViewContentAdapter){
-                SwipeRecyclerViewContentAdapter subAdapter = (SwipeRecyclerViewContentAdapter) adapter.getSubAdapter(i);
+            if(adapter.getSubAdapter(i) instanceof SwipeRecyclerViewAdapter){
+                SwipeRecyclerViewAdapter subAdapter = (SwipeRecyclerViewAdapter) adapter.getSubAdapter(i);
 
                 subAdapter.setBackLeftViewResourceId(subAdapter.getBackLeftViewResourceId() != 0 ? subAdapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
                 subAdapter.setBackRightViewResourceId(subAdapter.getBackRightViewResourceId() != 0 ? subAdapter.getBackRightViewResourceId() : mBackRightViewResourceId);
@@ -107,7 +107,7 @@ public class SwipeRecyclerView extends RecyclerView {
      *
      * @param adapter
      */
-    public void setAdapter(SwipeRecyclerViewContentAdapter adapter) {
+    public void setAdapter(SwipeRecyclerViewAdapter adapter) {
         adapter.setBackLeftViewResourceId(adapter.getBackLeftViewResourceId() != 0 ? adapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
         adapter.setBackRightViewResourceId(adapter.getBackRightViewResourceId() != 0 ? adapter.getBackRightViewResourceId() : mBackRightViewResourceId);
         adapter.setFrontViewResourceId(adapter.getFrontViewResourceId() != 0 ? adapter.getFrontViewResourceId() : mFrontViewResourceId);
@@ -546,13 +546,13 @@ public class SwipeRecyclerView extends RecyclerView {
     private void updateFrontViewTranslationObservables(ViewGroup frontView){
         Adapter adapter = getAdapter();
 
-        if(adapter instanceof SwipeRecyclerViewContentAdapter){
-            if(((SwipeRecyclerViewContentAdapter) adapter).isFrontViewTranslationObservableEnabled())
-                ((SwipeRecyclerViewContentAdapter) adapter).getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
+        if(adapter instanceof SwipeRecyclerViewAdapter){
+            if(((SwipeRecyclerViewAdapter) adapter).isFrontViewTranslationObservableEnabled())
+                ((SwipeRecyclerViewAdapter) adapter).getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
         } else if(adapter instanceof SwipeRecyclerViewMergeAdapter){
             for(int i = 0; i < ((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapterCount(); i++){
-                if(((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i) instanceof SwipeRecyclerViewContentAdapter){
-                    SwipeRecyclerViewContentAdapter subAdapter = (SwipeRecyclerViewContentAdapter) ((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i);
+                if(((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i) instanceof SwipeRecyclerViewAdapter){
+                    SwipeRecyclerViewAdapter subAdapter = (SwipeRecyclerViewAdapter) ((SwipeRecyclerViewMergeAdapter) adapter).getSubAdapter(i);
 
                     if(subAdapter.isFrontViewTranslationObservableEnabled())
                         subAdapter.getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);

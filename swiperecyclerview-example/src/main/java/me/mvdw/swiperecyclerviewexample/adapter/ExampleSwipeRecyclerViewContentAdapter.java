@@ -9,14 +9,14 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewContentAdapter;
+import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewAdapter;
 import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 import me.mvdw.swiperecyclerviewexample.R;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewContentAdapter {
+public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewAdapter {
 
     public interface ExampleSwipeRecyclerViewContentAdapterListener {
         void onDeleteClicked(int position);
@@ -33,12 +33,12 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
     }
 
     @Override
-    public SwipeRecyclerViewHolder onCreateViewHolder(ViewGroup parent, int i) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
         return super.onCreateViewHolder(parent, i);
     }
 
     @Override
-    public void onBindViewHolder(final SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final ViewHolder viewHolder, int i) {
         super.onBindViewHolder(viewHolder, i);
 
         // Set front view data
@@ -91,7 +91,7 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewCon
     }
 
     @Override
-    protected void onFrontViewTranslationChanged(final SwipeRecyclerViewContentAdapter.SwipeRecyclerViewHolder viewHolder, float frontViewTranslationX){
+    protected void onFrontViewTranslationChanged(final ViewHolder viewHolder, float frontViewTranslationX){
         // Little parallax effect example
         LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
         TextView backRightTextView = (TextView) backRightView.findViewById(R.id.back_right_text_view);
