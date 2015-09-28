@@ -77,6 +77,10 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
         this.mData = data;
     }
 
+    public Object getDataForPosition(int position){
+        return mData.get(position - mHeaderViews.size());
+    }
+
     /**
      * Add header view
      *

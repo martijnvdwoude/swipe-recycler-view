@@ -72,10 +72,6 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
         return mFrontViewResourceId;
     }
 
-    public Object getDataForPosition(int position){
-        return mData.get(position - mHeaderViews.size());
-    }
-
     /**
      * Getters/setters for the front view observable
      */
