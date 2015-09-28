@@ -2,6 +2,8 @@
 
 Rough first draft of a swipable RecyclerView.
 
+! There will be bugs !
+
 ####SwipeRecyclerView
 
 #####XML usage:
