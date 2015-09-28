@@ -7,16 +7,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
-
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewAdapter;
-import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 import me.mvdw.swiperecyclerviewexample.R;
+import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewAdapter {
+public class ExampleSwipeRecyclerViewAdapter extends SwipeRecyclerViewAdapter {
 
     public interface ExampleSwipeRecyclerViewContentAdapterListener {
         void onDeleteClicked(int position);
@@ -24,11 +22,9 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewAda
 
     private ExampleSwipeRecyclerViewContentAdapterListener mListener;
 
-    private ArrayList<SwipeRecyclerViewItem> mData;
-
     private Context mContext;
 
-    public ExampleSwipeRecyclerViewContentAdapter(Context context) {
+    public ExampleSwipeRecyclerViewAdapter(Context context) {
         this.mContext = context;
     }
 
@@ -47,7 +43,7 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewAda
         LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
 
         final TextView title =  (TextView) frontView.findViewById(R.id.front_text_view);
-        title.setText(mData.get(i).getText());
+        title.setText(((SwipeRecyclerViewItem) mData.get(i)).getText());
 
         frontView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,20 +66,11 @@ public class ExampleSwipeRecyclerViewContentAdapter extends SwipeRecyclerViewAda
                 @Override
                 public void onClick(View view) {
                     if (mListener != null) {
-                        mListener.onDeleteClicked(viewHolder.getPosition());
+                        mListener.onDeleteClicked(viewHolder.getAdapterPosition());
                     }
                 }
             });
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return mData.size();
-    }
-
-    public void setData(ArrayList<SwipeRecyclerViewItem> data){
-        this.mData = data;
     }
 
     public void setListener(ExampleSwipeRecyclerViewContentAdapterListener listener){

@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -15,9 +14,7 @@ import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class SwipeRecyclerViewAdapter extends RecyclerView.Adapter<SwipeRecyclerViewAdapter.ViewHolder> {
-
-    protected ArrayList<?> mData;
+public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFooterAdapter {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
@@ -34,24 +31,21 @@ public class SwipeRecyclerViewAdapter extends RecyclerView.Adapter<SwipeRecycler
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.swipe_recycler_view_item, parent, false);
-        return new ViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case MainViewHolder.TYPE_CONTENT:
+
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.swipe_recycler_view_item, parent, false);
+                return new SwipeableViewHolder(view);
+        }
+
+        return super.onCreateViewHolder(parent, viewType);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return mData.size();
-    }
-
-    public void setData(ArrayList<?> data) {
-        this.mData = data;
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        super.onBindViewHolder(viewHolder, position);
     }
 
     public void setBackLeftViewResourceId(final int backLeftViewResourceId){
@@ -78,6 +72,10 @@ public class SwipeRecyclerViewAdapter extends RecyclerView.Adapter<SwipeRecycler
         return mFrontViewResourceId;
     }
 
+    public Object getDataForPosition(int position){
+        return mData.get(position - mHeaderViews.size());
+    }
+
     /**
      * Getters/setters for the front view observable
      */
@@ -100,16 +98,16 @@ public class SwipeRecyclerViewAdapter extends RecyclerView.Adapter<SwipeRecycler
      * @param viewHolder reference to the viewHolder of the swiping row
      * @param frontViewTranslationX the X translation value of the front view
      */
-    protected void onFrontViewTranslationChanged(ViewHolder viewHolder, float frontViewTranslationX){}
+    protected void onFrontViewTranslationChanged(SwipeableViewHolder viewHolder, float frontViewTranslationX){}
 
     /**
      * Viewholder
      */
-    public class ViewHolder extends RecyclerView.ViewHolder implements Observer {
+    public class SwipeableViewHolder extends MainViewHolder implements Observer {
 
         private SwipeRecyclerViewRowView mSwipeRecyclerViewRowView;
 
-        public ViewHolder(View itemView) {
+        public SwipeableViewHolder(View itemView) {
             super(itemView);
 
             mSwipeRecyclerViewRowView = (SwipeRecyclerViewRowView) itemView.findViewById(R.id.swipe_recycler_view_row_view);

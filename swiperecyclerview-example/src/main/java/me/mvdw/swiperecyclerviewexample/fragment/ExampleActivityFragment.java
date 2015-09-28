@@ -8,23 +8,22 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerView;
 import me.mvdw.swiperecyclerviewexample.R;
-import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewContentAdapter;
+import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewHeaderFooterAdapter;
 import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewContentAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
+public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewHeaderFooterAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
 
     private SwipeRecyclerView swipeRecyclerView;
-    private SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter> mergeAdapter;
-    private ExampleSwipeRecyclerViewContentAdapter swipeRecyclerViewAdapter;
+    private ExampleSwipeRecyclerViewHeaderFooterAdapter swipeRecyclerViewAdapter;
 
     private int count = 0;
 
@@ -56,30 +55,23 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerView.setLayoutManager(layoutManager);
         swipeRecyclerView.setHasFixedSize(true);
 
-        // New merge adapter
-//        mergeAdapter = new SwipeRecyclerViewMergeAdapter<RecyclerView.Adapter>();
-//        mergeAdapter.setHideHeadersForEmptyContent(true);
-//        mergeAdapter.setHideFootersForEmptyContent(true);
-
         // New content adapter
-        swipeRecyclerViewAdapter = new ExampleSwipeRecyclerViewContentAdapter(getActivity());
+        swipeRecyclerViewAdapter = new ExampleSwipeRecyclerViewHeaderFooterAdapter(getContext());
         swipeRecyclerViewAdapter.setData(swipeRecyclerViewItems);
         swipeRecyclerViewAdapter.setListener(this);
         swipeRecyclerViewAdapter.setFrontViewTranslationObservableEnabled(true);
 
-        // Add content adapter to merge adapter
-//        mergeAdapter.addAdapter(swipeRecyclerViewAdapter);
+        // New header view
+        TextView header = new TextView(getActivity());
+        header.setText("Header");
+        swipeRecyclerViewAdapter.addHeaderView(header);
 
         // New footer view
-//        mergeAdapter.addFooterView(mFooter);
-//
-//        //
-//        mergeAdapter.addHeaderView(mHeader);
+        TextView footer = new TextView(getActivity());
+        footer.setText("Footer");
+        swipeRecyclerViewAdapter.addFooterView(footer);
 
-        // Set merge adapter to recyclerview
-//        swipeRecyclerView.setAdapter(mergeAdapter);
-
-        // Or set regular content adapter
+        // Set header footer adapter
         swipeRecyclerView.setAdapter(swipeRecyclerViewAdapter);
     }
 
@@ -94,15 +86,15 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
 
             swipeRecyclerViewItems.add(0, newItem);
 
-//            mergeAdapter.notifyItemInserted(swipeRecyclerViewAdapter, 0);
-            swipeRecyclerViewAdapter.notifyItemInserted(0);
+            swipeRecyclerViewAdapter.notifyContentItemInserted(0);
         }
     }
 
     @Override
     public void onDeleteClicked(int position) {
-        swipeRecyclerViewItems.remove(position);
-//        mergeAdapter.notifyItemRemoved(swipeRecyclerViewAdapter, position);
+        SwipeRecyclerViewItem itemToDelete = (SwipeRecyclerViewItem) swipeRecyclerViewAdapter.getDataForPosition(position);
+        swipeRecyclerViewItems.remove(itemToDelete);
+
         swipeRecyclerViewAdapter.notifyItemRemoved(position);
 
         swipeRecyclerView.closeOpenedItem();
