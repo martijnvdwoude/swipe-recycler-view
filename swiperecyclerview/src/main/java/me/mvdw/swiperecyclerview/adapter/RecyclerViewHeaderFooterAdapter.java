@@ -11,7 +11,7 @@ import java.util.ArrayList;
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapter<RecyclerViewHeaderFooterAdapter.MainViewHolder> {
 
     protected ArrayList<?> mData;
 
@@ -21,27 +21,27 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
     private int mContentItemLayout;
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch(viewType){
             case MainViewHolder.TYPE_HEADER:
-                return new HeaderViewHolder(new LinearLayout(parent.getContext()));
+                return new HeaderViewHolder(new LinearLayout(parent.getContext()), this);
 
             case MainViewHolder.TYPE_CONTENT:
                 View view = LayoutInflater.from(parent.getContext()).inflate(mContentItemLayout, parent, false);
-                return new MainViewHolder(view);
+                return new MainViewHolder(view, this);
 
             case MainViewHolder.TYPE_FOOTER:
-                return new FooterViewHolder(new LinearLayout(parent.getContext()));
+                return new FooterViewHolder(new LinearLayout(parent.getContext()), this);
         }
 
         return null;
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(MainViewHolder viewHolder, int position) {
         if(viewHolder instanceof HeaderViewHolder){
             if(mHeaderViews.get(position).getParent() != null)
-                ((HeaderViewHolder) viewHolder).rootView.removeView(mHeaderViews.get(position));
+                ((LinearLayout) mHeaderViews.get(position).getParent()).removeView(mHeaderViews.get(position));
 
             ((HeaderViewHolder) viewHolder).rootView.addView(mHeaderViews.get(position));
 
@@ -49,7 +49,7 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
             position -= mData.size() + mHeaderViews.size();
 
             if(mFooterViews.get(position).getParent() != null)
-                ((FooterViewHolder) viewHolder).rootView.removeView(mFooterViews.get(position));
+                ((LinearLayout) mFooterViews.get(position).getParent()).removeView(mFooterViews.get(position));
 
             ((FooterViewHolder) viewHolder).rootView.addView(mFooterViews.get(position));
         }
@@ -57,7 +57,15 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
 
     @Override
     public int getItemCount() {
-        return mData.size() + mHeaderViews.size() + mFooterViews.size();
+        return mData.size() + getHeaderItemCount() + getFooterItemCount();
+    }
+
+    public int getHeaderItemCount(){
+        return mHeaderViews.size();
+    }
+
+    public int getFooterItemCount(){
+        return mFooterViews.size();
     }
 
     @Override
@@ -134,8 +142,33 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
         public static final int TYPE_CONTENT = 1;
         public static final int TYPE_FOOTER = 2;
 
-        public MainViewHolder(View itemView) {
+        private RecyclerView.Adapter adapter;
+
+        public MainViewHolder(View itemView, RecyclerView.Adapter adapter) {
             super(itemView);
+
+            this.adapter = adapter;
+        }
+
+        public int getLocalPosition(){
+            RecyclerView recyclerView = (RecyclerView) itemView.getParent();
+            RecyclerView.Adapter mainAdapter = recyclerView.getAdapter();
+
+            int position = super.getAdapterPosition();
+
+            if(mainAdapter instanceof SwipeRecyclerViewMergeAdapter){
+                for(Object localAdapter : ((SwipeRecyclerViewMergeAdapter) mainAdapter).mAdapters){
+                    RecyclerView.Adapter adapter = ((SwipeRecyclerViewMergeAdapter.LocalAdapter) localAdapter).mAdapter;
+
+                    if(adapter.equals(this.adapter)){
+                        break;
+                    } else {
+                        position -= adapter.getItemCount();
+                    }
+                }
+            }
+
+            return position;
         }
     }
 
@@ -143,10 +176,10 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
 
         private ViewGroup rootView;
 
-        public HeaderViewHolder(ViewGroup itemView) {
-            super(itemView);
+        public HeaderViewHolder(ViewGroup itemView, RecyclerView.Adapter adapter) {
+            super(itemView, adapter);
 
-            rootView = itemView;
+            this.rootView = itemView;
         }
     }
 
@@ -154,8 +187,8 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
 
         private ViewGroup rootView;
 
-        public FooterViewHolder(ViewGroup itemView) {
-            super(itemView);
+        public FooterViewHolder(ViewGroup itemView, RecyclerView.Adapter adapter) {
+            super(itemView, adapter);
 
             rootView = itemView;
         }

@@ -1,5 +1,6 @@
 package me.mvdw.swiperecyclerview.adapter;
 
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,13 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
     private boolean mEnableFrontViewTranslationObservable;
     private FrontViewTranslationObservable frontViewTranslationObservable = new FrontViewTranslationObservable();
 
+    private Context mContext;
+
+    public SwipeRecyclerViewHeaderFooterAdapter(Context context) {
+        super();
+        this.mContext = context;
+    }
+
     public static class FrontViewTranslationObservable extends Observable {
         public void frontViewTranslationChanged(ViewGroup frontView){
             setChanged();
@@ -31,20 +39,20 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case MainViewHolder.TYPE_CONTENT:
 
                 View view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.swipe_recycler_view_item, parent, false);
-                return new SwipeableViewHolder(view);
+                return new SwipeableViewHolder(view, this);
         }
 
         return super.onCreateViewHolder(parent, viewType);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(MainViewHolder viewHolder, int position) {
         super.onBindViewHolder(viewHolder, position);
     }
 
@@ -103,8 +111,8 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
 
         private SwipeRecyclerViewRowView mSwipeRecyclerViewRowView;
 
-        public SwipeableViewHolder(View itemView) {
-            super(itemView);
+        public SwipeableViewHolder(View itemView, RecyclerView.Adapter adapter) {
+            super(itemView, adapter);
 
             mSwipeRecyclerViewRowView = (SwipeRecyclerViewRowView) itemView.findViewById(R.id.swipe_recycler_view_row_view);
 

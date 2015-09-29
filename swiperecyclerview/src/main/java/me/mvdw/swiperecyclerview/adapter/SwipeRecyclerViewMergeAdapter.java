@@ -10,22 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import android.content.Context;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
-import android.view.ViewGroup;
-
 public class SwipeRecyclerViewMergeAdapter<T extends RecyclerView.Adapter> extends RecyclerView.Adapter {
 
     private Context mContext;
     protected ArrayList<LocalAdapter> mAdapters = new ArrayList<>();
-    protected ForwardingDataSetObserver observer = new ForwardingDataSetObserver();
     private int mViewTypeIndex=0;
+    private HashMap<RecyclerView.Adapter, ForwardingDataSetObserver> observers = new HashMap<>();
 
     public SwipeRecyclerViewMergeAdapter() {
     }
@@ -56,6 +46,10 @@ public class SwipeRecyclerViewMergeAdapter<T extends RecyclerView.Adapter> exten
     /** Add the given adapter to the list of merged adapters at the given index. */
     public void addAdapter(int index, T adapter) {
         mAdapters.add(index, new LocalAdapter(adapter));
+
+        ForwardingDataSetObserver observer = new ForwardingDataSetObserver(adapter);
+        observers.put(adapter, observer);
+
         adapter.registerAdapterDataObserver(observer);
         notifyDataSetChanged();
     }
@@ -74,7 +68,11 @@ public class SwipeRecyclerViewMergeAdapter<T extends RecyclerView.Adapter> exten
     public void removeAdapter(int index) {
         if (index < 0 || index >= mAdapters.size()) return;
         LocalAdapter adapter = mAdapters.remove(index);
+
+        ForwardingDataSetObserver observer = observers.get(adapter.mAdapter);
         adapter.mAdapter.unregisterAdapterDataObserver(observer);
+        observers.remove(adapter.mAdapter);
+
         notifyDataSetChanged();
     }
 
@@ -111,7 +109,7 @@ public class SwipeRecyclerViewMergeAdapter<T extends RecyclerView.Adapter> exten
      *          List of views to add
      */
     public void addViews(List<View> views) {
-        addAdapter((T) new ViewsAdapter(mContext,views));
+        addAdapter((T) new ViewsAdapter(mContext, views));
     }
 
     @Override public int getItemCount() {
@@ -186,24 +184,48 @@ public class SwipeRecyclerViewMergeAdapter<T extends RecyclerView.Adapter> exten
 	 * forwarding data set observer
 	 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
 
+    private int getMergePositionLocalPosition(RecyclerView.Adapter adapter, int position){
+
+        for(LocalAdapter localAdapter : mAdapters){
+            if(!localAdapter.mAdapter.equals(adapter)){
+                position += localAdapter.mAdapter.getItemCount();
+            }
+        }
+
+        return position;
+    }
+
     private class ForwardingDataSetObserver extends RecyclerView.AdapterDataObserver {
+
+        private RecyclerView.Adapter mAdapter;
+
+        public ForwardingDataSetObserver(RecyclerView.Adapter adapter) {
+            this.mAdapter = adapter;
+        }
+
         @Override public void onChanged() {
             notifyDataSetChanged();
         }
 
         @Override public void onItemRangeChanged(int positionStart, int itemCount) {
-            super.onItemRangeChanged(positionStart, itemCount);
-            notifyItemRangeChanged(positionStart, itemCount);
+            int mergeStartPosition = getMergePositionLocalPosition(mAdapter, positionStart);
+
+            super.onItemRangeChanged(mergeStartPosition, itemCount);
+            notifyItemRangeChanged(mergeStartPosition, itemCount);
         }
 
         @Override public void onItemRangeInserted(int positionStart, int itemCount) {
-            super.onItemRangeInserted(positionStart, itemCount);
-            notifyItemRangeInserted(positionStart, itemCount);
+            int mergeStartPosition = getMergePositionLocalPosition(mAdapter, positionStart);
+
+            super.onItemRangeInserted(mergeStartPosition, itemCount);
+            notifyItemRangeInserted(mergeStartPosition, itemCount);
         }
 
         @Override public void onItemRangeRemoved(int positionStart, int itemCount) {
-            super.onItemRangeRemoved(positionStart, itemCount);
-            notifyItemRangeRemoved(positionStart, itemCount);
+            int mergeStartPosition = getMergePositionLocalPosition(mAdapter, positionStart);
+
+            super.onItemRangeRemoved(mergeStartPosition, itemCount);
+            notifyItemRangeRemoved(mergeStartPosition, itemCount);
         }
     }
 

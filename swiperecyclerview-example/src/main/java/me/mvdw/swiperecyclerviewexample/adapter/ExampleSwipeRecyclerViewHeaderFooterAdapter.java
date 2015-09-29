@@ -1,7 +1,6 @@
 package me.mvdw.swiperecyclerviewexample.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -26,28 +25,29 @@ public class ExampleSwipeRecyclerViewHeaderFooterAdapter extends SwipeRecyclerVi
     private Context mContext;
 
     public ExampleSwipeRecyclerViewHeaderFooterAdapter(Context context) {
+        super(context);
         this.mContext = context;
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int i) {
         return super.onCreateViewHolder(parent, i);
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final MainViewHolder viewHolder, int i) {
         super.onBindViewHolder(viewHolder, i);
 
         int type = getItemViewType(i);
 
-        switch (type){
+        switch (type) {
             case MainViewHolder.TYPE_CONTENT:
                 // Set front view data
                 LinearLayout frontView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getFrontView();
                 LinearLayout backLeftView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getBackLeftView();
                 LinearLayout backRightView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getBackRightView();
 
-                final TextView title =  (TextView) frontView.findViewById(R.id.front_text_view);
+                final TextView title = (TextView) frontView.findViewById(R.id.front_text_view);
                 title.setText(((SwipeRecyclerViewItem) getDataForPosition(i)).getText());
 
                 frontView.setOnClickListener(new View.OnClickListener() {
@@ -57,7 +57,7 @@ public class ExampleSwipeRecyclerViewHeaderFooterAdapter extends SwipeRecyclerVi
                     }
                 });
 
-                if(backLeftView != null) {
+                if (backLeftView != null) {
                     backLeftView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -66,12 +66,12 @@ public class ExampleSwipeRecyclerViewHeaderFooterAdapter extends SwipeRecyclerVi
                     });
                 }
 
-                if(backRightView != null) {
+                if (backRightView != null) {
                     backRightView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
                             if (mListener != null) {
-                                mListener.onDeleteClicked(viewHolder.getAdapterPosition());
+                                mListener.onDeleteClicked(viewHolder.getLocalPosition());
                             }
                         }
                     });
