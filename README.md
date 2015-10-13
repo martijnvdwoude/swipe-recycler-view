@@ -2,8 +2,6 @@
 
 Rough first draft of a swipable RecyclerView.
 
-! There will be bugs !
-
 ####SwipeRecyclerView
 
 #####XML usage:
@@ -28,7 +26,7 @@ You can override the in XML specified general layouts on the SwipeRecyclerView f
 - `setBackRightViewResourceId(final int backRightViewResourceId)`
 - `setFrontViewResourceId(final int frontViewResourceId)`
 
-####RecyclerViewHeaderFooterAdapter
+####RecyclerViewHeaderFooterSubAdapter
 Basic adapter including header and footer support.
 
 #####Methods
@@ -45,7 +43,7 @@ Get data object for an adapter position (for example to delete it from the datas
 - `getDataForPosition(int position)`
 
 ####SwipeRecyclerViewHeaderFooterAdapter
-Swipeable version of `RecyclerViewHeaderFooterAdapter`
+Swipeable version of `RecyclerViewHeaderFooterSubAdapter`
 
 #####Additional methods
 
@@ -54,5 +52,7 @@ You can override the in XML specified general layouts on the SwipeRecyclerView f
 - `setBackRightViewResourceId(final int backRightViewResourceId)`
 - `setFrontViewResourceId(final int frontViewResourceId)`
 
-####SwipeRecyclerViewMergeAdapter
-Finally set either of the adapters on the `SwipeRecyclerView` directly or add it to a `SwipeRecyclerViewMergeAdapter` first to support multiple adapters. The merge adapter also allows for mixing all types of adapters.
+####RecyclerViewMergeAdapter
+This project has a dependency on my `RecyclerViewMergeAdapter`, which can be found here: https://github.com/martijnvdwoude/recycler-view-merge-adapter
+
+Finally set either of the adapters on the `SwipeRecyclerView` directly or add it to a `RecyclerViewMergeAdapter` first to support multiple adapters. The merge adapter also allows for mixing all types of adapters.
