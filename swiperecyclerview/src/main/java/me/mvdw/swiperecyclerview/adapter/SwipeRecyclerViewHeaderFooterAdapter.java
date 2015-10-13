@@ -1,21 +1,17 @@
 package me.mvdw.swiperecyclerview.adapter;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Observable;
-import java.util.Observer;
-
 import me.mvdw.swiperecyclerview.R;
-import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
+import me.mvdw.swiperecyclerview.viewholder.SwipeableViewHolder;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFooterAdapter {
+public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFooterSubAdapter<SwipeableViewHolder> {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
@@ -31,29 +27,17 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
         this.mContext = context;
     }
 
-    public static class FrontViewTranslationObservable extends Observable {
-        public void frontViewTranslationChanged(ViewGroup frontView){
-            setChanged();
-            notifyObservers(frontView);
-        }
-    }
-
     @Override
-    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public SwipeableViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
-            case MainViewHolder.TYPE_CONTENT:
+            case RecyclerViewHeaderFooterSubAdapter.MainViewHolder.TYPE_CONTENT:
 
                 View view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.swipe_recycler_view_item, parent, false);
-                return new SwipeableViewHolder(view, this);
+                return new SwipeableViewHolder(view, mFrontViewResourceId, mBackLeftViewResourceId, mBackRightViewResourceId, mEnableFrontViewTranslationObservable, frontViewTranslationObservable);
         }
 
         return super.onCreateViewHolder(parent, viewType);
-    }
-
-    @Override
-    public void onBindViewHolder(MainViewHolder viewHolder, int position) {
-        super.onBindViewHolder(viewHolder, position);
     }
 
     public void setBackLeftViewResourceId(final int backLeftViewResourceId){
@@ -103,46 +87,4 @@ public class SwipeRecyclerViewHeaderFooterAdapter extends RecyclerViewHeaderFoot
      * @param frontViewTranslationX the X translation value of the front view
      */
     protected void onFrontViewTranslationChanged(SwipeableViewHolder viewHolder, float frontViewTranslationX){}
-
-    /**
-     * Viewholder
-     */
-    public class SwipeableViewHolder extends MainViewHolder implements Observer {
-
-        private SwipeRecyclerViewRowView mSwipeRecyclerViewRowView;
-
-        public SwipeableViewHolder(View itemView, RecyclerView.Adapter adapter) {
-            super(itemView, adapter);
-
-            mSwipeRecyclerViewRowView = (SwipeRecyclerViewRowView) itemView.findViewById(R.id.swipe_recycler_view_row_view);
-
-            mSwipeRecyclerViewRowView.setFrontViewResourceId(mFrontViewResourceId);
-            mSwipeRecyclerViewRowView.setBackLeftViewResourceId(mBackLeftViewResourceId);
-            mSwipeRecyclerViewRowView.setBackRightViewResourceId(mBackRightViewResourceId);
-
-            mSwipeRecyclerViewRowView.initViews();
-
-            if(mEnableFrontViewTranslationObservable)
-                frontViewTranslationObservable.addObserver(this);
-        }
-
-        public ViewGroup getBackLeftView(){
-            return mSwipeRecyclerViewRowView.getBackLeftView();
-        }
-
-        public ViewGroup getBackRightView(){
-            return mSwipeRecyclerViewRowView.getBackRightView();
-        }
-
-        public ViewGroup getFrontView(){
-            return mSwipeRecyclerViewRowView.getFrontView();
-        }
-
-        @Override
-        public void update(Observable observable, Object frontView) {
-            if(frontView == getFrontView()) {
-                onFrontViewTranslationChanged(this, this.getFrontView().getTranslationX());
-            }
-        }
-    }
 }

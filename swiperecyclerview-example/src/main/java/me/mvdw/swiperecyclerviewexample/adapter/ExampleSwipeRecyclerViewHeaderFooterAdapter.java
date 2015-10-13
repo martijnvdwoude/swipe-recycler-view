@@ -8,6 +8,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewHeaderFooterAdapter;
+import me.mvdw.swiperecyclerview.viewholder.SwipeableViewHolder;
 import me.mvdw.swiperecyclerviewexample.R;
 import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
@@ -30,22 +31,22 @@ public class ExampleSwipeRecyclerViewHeaderFooterAdapter extends SwipeRecyclerVi
     }
 
     @Override
-    public MainViewHolder onCreateViewHolder(ViewGroup parent, int i) {
+    public SwipeableViewHolder onCreateViewHolder(ViewGroup parent, int i) {
         return super.onCreateViewHolder(parent, i);
     }
 
     @Override
-    public void onBindViewHolder(final MainViewHolder viewHolder, int i) {
+    public void onBindViewHolder(final SwipeableViewHolder viewHolder, int i) {
         super.onBindViewHolder(viewHolder, i);
 
         int type = getItemViewType(i);
 
         switch (type) {
-            case MainViewHolder.TYPE_CONTENT:
+            case SwipeRecyclerViewHeaderFooterAdapter.MainViewHolder.TYPE_CONTENT:
                 // Set front view data
-                LinearLayout frontView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getFrontView();
-                LinearLayout backLeftView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getBackLeftView();
-                LinearLayout backRightView = (LinearLayout) ((SwipeableViewHolder) viewHolder).getBackRightView();
+                LinearLayout frontView = (LinearLayout) viewHolder.getFrontView();
+                LinearLayout backLeftView = (LinearLayout) viewHolder.getBackLeftView();
+                LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
 
                 final TextView title = (TextView) frontView.findViewById(R.id.front_text_view);
                 title.setText(((SwipeRecyclerViewItem) getDataForPosition(i)).getText());
@@ -71,7 +72,7 @@ public class ExampleSwipeRecyclerViewHeaderFooterAdapter extends SwipeRecyclerVi
                         @Override
                         public void onClick(View view) {
                             if (mListener != null) {
-                                mListener.onDeleteClicked(viewHolder.getLocalPosition());
+                                mListener.onDeleteClicked(viewHolder.getSubAdapterPosition());
                             }
                         }
                     });

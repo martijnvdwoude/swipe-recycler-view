@@ -1,1 +1,1 @@
-include ':swiperecyclerview-example', ':swiperecyclerview'
+include ':swiperecyclerview-example', ':swiperecyclerview', ':recyclerviewmergeadapter-release'

@@ -12,9 +12,10 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewMergeAdapter;
+import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewMergeAdapter;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerView;
 import me.mvdw.swiperecyclerviewexample.R;
+import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewAdapter;
 import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewHeaderFooterAdapter;
 import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
@@ -24,8 +25,8 @@ import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewHeaderFooterAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
 
     private SwipeRecyclerView swipeRecyclerView;
-    private SwipeRecyclerViewMergeAdapter mergeAdapter;
-    private ExampleSwipeRecyclerViewHeaderFooterAdapter swipeRecyclerViewAdapter1;
+    private RecyclerViewMergeAdapter mergeAdapter;
+    private ExampleSwipeRecyclerViewAdapter swipeRecyclerViewAdapter1;
     private ExampleSwipeRecyclerViewHeaderFooterAdapter swipeRecyclerViewAdapter2;
 
     private int count = 0;
@@ -65,10 +66,10 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerView.setHasFixedSize(true);
 
         // New merge adapter
-        mergeAdapter = new SwipeRecyclerViewMergeAdapter();
+        mergeAdapter = new RecyclerViewMergeAdapter();
 
         // New content adapter no headers and footers
-        swipeRecyclerViewAdapter1 = new ExampleSwipeRecyclerViewHeaderFooterAdapter(getContext());
+        swipeRecyclerViewAdapter1 = new ExampleSwipeRecyclerViewAdapter(getContext());
         swipeRecyclerViewAdapter1.setData(recyclerViewItems);
         swipeRecyclerViewAdapter1.setFrontViewTranslationObservableEnabled(true);
 
@@ -81,12 +82,12 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         // New header view
         TextView header = new TextView(getActivity());
         header.setText("Header");
-        swipeRecyclerViewAdapter2.addHeaderView(header);
+//        swipeRecyclerViewAdapter2.addHeaderView(header);
 
         // New footer view
         TextView footer = new TextView(getActivity());
         footer.setText("Footer");
-        swipeRecyclerViewAdapter2.addFooterView(footer);
+//        swipeRecyclerViewAdapter2.addFooterView(footer);
 
         // Add adapters to merge adapter
         mergeAdapter.addAdapter(swipeRecyclerViewAdapter1);
@@ -94,6 +95,13 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
 
         // Set merge adapter to recycler view
         swipeRecyclerView.setAdapter(mergeAdapter);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("recyclerViewItems", recyclerViewItems);
+        outState.putParcelableArrayList("swipeRecyclerViewItems", swipeRecyclerViewItems);
+        super.onSaveInstanceState(outState);
     }
 
     public void addItem(){

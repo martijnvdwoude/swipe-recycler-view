@@ -1,6 +1,5 @@
 package me.mvdw.swiperecyclerview.adapter;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,10 +7,12 @@ import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 
+import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewSubAdapter;
+
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapter<RecyclerViewHeaderFooterAdapter.MainViewHolder> {
+public abstract class RecyclerViewHeaderFooterSubAdapter<VH extends RecyclerViewHeaderFooterSubAdapter.MainViewHolder> extends RecyclerViewSubAdapter<VH> {
 
     protected ArrayList<?> mData;
 
@@ -21,24 +22,25 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
     private int mContentItemLayout;
 
     @Override
-    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         switch(viewType){
             case MainViewHolder.TYPE_HEADER:
-                return new HeaderViewHolder(new LinearLayout(parent.getContext()), this);
+                return (VH) new HeaderViewHolder(new LinearLayout(parent.getContext()));
 
             case MainViewHolder.TYPE_CONTENT:
                 View view = LayoutInflater.from(parent.getContext()).inflate(mContentItemLayout, parent, false);
-                return new MainViewHolder(view, this);
+                return (VH) new MainViewHolder(view);
 
             case MainViewHolder.TYPE_FOOTER:
-                return new FooterViewHolder(new LinearLayout(parent.getContext()), this);
+                return (VH) new FooterViewHolder(new LinearLayout(parent.getContext()));
         }
 
         return null;
     }
 
     @Override
-    public void onBindViewHolder(MainViewHolder viewHolder, int position) {
+    public void onBindViewHolder(VH viewHolder, int position) {
+        super.onBindViewHolder(viewHolder, position);
         if(viewHolder instanceof HeaderViewHolder){
             if(mHeaderViews.get(position).getParent() != null)
                 ((LinearLayout) mHeaderViews.get(position).getParent()).removeView(mHeaderViews.get(position));
@@ -136,59 +138,34 @@ public abstract class RecyclerViewHeaderFooterAdapter extends RecyclerView.Adapt
      * Viewholders
      *
      */
-    public class MainViewHolder extends RecyclerView.ViewHolder {
+    public static class MainViewHolder extends RecyclerViewSubAdapter.ViewHolder {
 
         public static final int TYPE_HEADER = 0;
         public static final int TYPE_CONTENT = 1;
         public static final int TYPE_FOOTER = 2;
 
-        private RecyclerView.Adapter adapter;
-
-        public MainViewHolder(View itemView, RecyclerView.Adapter adapter) {
+        public MainViewHolder(View itemView) {
             super(itemView);
-
-            this.adapter = adapter;
-        }
-
-        public int getLocalPosition(){
-            RecyclerView recyclerView = (RecyclerView) itemView.getParent();
-            RecyclerView.Adapter mainAdapter = recyclerView.getAdapter();
-
-            int position = super.getAdapterPosition();
-
-            if(mainAdapter instanceof SwipeRecyclerViewMergeAdapter){
-                for(Object localAdapter : ((SwipeRecyclerViewMergeAdapter) mainAdapter).mAdapters){
-                    RecyclerView.Adapter adapter = ((SwipeRecyclerViewMergeAdapter.LocalAdapter) localAdapter).mAdapter;
-
-                    if(adapter.equals(this.adapter)){
-                        break;
-                    } else {
-                        position -= adapter.getItemCount();
-                    }
-                }
-            }
-
-            return position;
         }
     }
 
-    public class HeaderViewHolder extends MainViewHolder {
+    public static class HeaderViewHolder extends MainViewHolder {
 
         private ViewGroup rootView;
 
-        public HeaderViewHolder(ViewGroup itemView, RecyclerView.Adapter adapter) {
-            super(itemView, adapter);
+        public HeaderViewHolder(ViewGroup itemView) {
+            super(itemView);
 
             this.rootView = itemView;
         }
     }
 
-    public class FooterViewHolder extends MainViewHolder {
+    public static class FooterViewHolder extends MainViewHolder {
 
         private ViewGroup rootView;
 
-        public FooterViewHolder(ViewGroup itemView, RecyclerView.Adapter adapter) {
-            super(itemView, adapter);
+        public FooterViewHolder(ViewGroup itemView) {
+            super(itemView);
 
             rootView = itemView;
         }
