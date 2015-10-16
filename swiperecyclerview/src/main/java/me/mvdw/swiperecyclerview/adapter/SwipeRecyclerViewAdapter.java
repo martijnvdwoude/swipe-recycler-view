@@ -1,21 +1,17 @@
 package me.mvdw.swiperecyclerview.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
-import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewSubAdapter;
 import me.mvdw.swiperecyclerview.R;
 import me.mvdw.swiperecyclerview.viewholder.SwipeableViewHolder;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class SwipeRecyclerViewAdapter extends RecyclerViewSubAdapter<SwipeableViewHolder> {
-
-    protected ArrayList<?> mData;
+public class SwipeRecyclerViewAdapter extends RecyclerViewHeaderFooterSubAdapter<RecyclerViewHeaderFooterSubAdapter.MainViewHolder> {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
@@ -24,25 +20,24 @@ public class SwipeRecyclerViewAdapter extends RecyclerViewSubAdapter<SwipeableVi
     private boolean mEnableFrontViewTranslationObservable;
     private FrontViewTranslationObservable frontViewTranslationObservable = new FrontViewTranslationObservable();
 
-    @Override
-    public SwipeableViewHolder onCreateViewHolder(ViewGroup parent, int i) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.swipe_recycler_view_item, parent, false);
-        return new SwipeableViewHolder(view, mFrontViewResourceId, mBackLeftViewResourceId, mBackRightViewResourceId, mEnableFrontViewTranslationObservable, frontViewTranslationObservable);
+    private Context mContext;
+
+    public SwipeRecyclerViewAdapter(Context context) {
+        super();
+        this.mContext = context;
     }
 
     @Override
-    public void onBindViewHolder(SwipeableViewHolder holder, int position) {
-        super.onBindViewHolder(holder, position);
-    }
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch (viewType) {
+            case RecyclerViewHeaderFooterSubAdapter.MainViewHolder.TYPE_CONTENT:
 
-    @Override
-    public int getItemCount() {
-        return mData.size();
-    }
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.swipe_recycler_view_item, parent, false);
+                return new SwipeableViewHolder(view, mFrontViewResourceId, mBackLeftViewResourceId, mBackRightViewResourceId, mEnableFrontViewTranslationObservable, frontViewTranslationObservable);
+        }
 
-    public void setData(ArrayList<?> data) {
-        this.mData = data;
+        return super.onCreateViewHolder(parent, viewType);
     }
 
     public void setBackLeftViewResourceId(final int backLeftViewResourceId){

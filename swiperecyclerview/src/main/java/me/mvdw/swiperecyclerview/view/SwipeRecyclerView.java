@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 
 import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewMergeAdapter;
 import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewAdapter;
-import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewHeaderFooterAdapter;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
@@ -97,28 +96,8 @@ public class SwipeRecyclerView extends RecyclerView {
                 subAdapter.setBackLeftViewResourceId(subAdapter.getBackLeftViewResourceId() != 0 ? subAdapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
                 subAdapter.setBackRightViewResourceId(subAdapter.getBackRightViewResourceId() != 0 ? subAdapter.getBackRightViewResourceId() : mBackRightViewResourceId);
                 subAdapter.setFrontViewResourceId(subAdapter.getFrontViewResourceId() != 0 ? subAdapter.getFrontViewResourceId() : mFrontViewResourceId);
-
-            } else if(adapter.getSubAdapter(i) instanceof SwipeRecyclerViewHeaderFooterAdapter){
-                SwipeRecyclerViewHeaderFooterAdapter subAdapter = (SwipeRecyclerViewHeaderFooterAdapter) adapter.getSubAdapter(i);
-
-                subAdapter.setBackLeftViewResourceId(subAdapter.getBackLeftViewResourceId() != 0 ? subAdapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
-                subAdapter.setBackRightViewResourceId(subAdapter.getBackRightViewResourceId() != 0 ? subAdapter.getBackRightViewResourceId() : mBackRightViewResourceId);
-                subAdapter.setFrontViewResourceId(subAdapter.getFrontViewResourceId() != 0 ? subAdapter.getFrontViewResourceId() : mFrontViewResourceId);
             }
         }
-
-        super.setAdapter(adapter);
-    }
-
-    /**
-     * Set swipeable adapter without header and footer support
-     *
-     * @param adapter
-     */
-    public void setAdapter(SwipeRecyclerViewAdapter adapter) {
-        adapter.setBackLeftViewResourceId(adapter.getBackLeftViewResourceId() != 0 ? adapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
-        adapter.setBackRightViewResourceId(adapter.getBackRightViewResourceId() != 0 ? adapter.getBackRightViewResourceId() : mBackRightViewResourceId);
-        adapter.setFrontViewResourceId(adapter.getFrontViewResourceId() != 0 ? adapter.getFrontViewResourceId() : mFrontViewResourceId);
 
         super.setAdapter(adapter);
     }
@@ -128,7 +107,7 @@ public class SwipeRecyclerView extends RecyclerView {
      *
      * @param adapter
      */
-    public void setAdapter(SwipeRecyclerViewHeaderFooterAdapter adapter) {
+    public void setAdapter(SwipeRecyclerViewAdapter adapter) {
         adapter.setBackLeftViewResourceId(adapter.getBackLeftViewResourceId() != 0 ? adapter.getBackLeftViewResourceId() : mBackLeftViewResourceId);
         adapter.setBackRightViewResourceId(adapter.getBackRightViewResourceId() != 0 ? adapter.getBackRightViewResourceId() : mBackRightViewResourceId);
         adapter.setFrontViewResourceId(adapter.getFrontViewResourceId() != 0 ? adapter.getFrontViewResourceId() : mFrontViewResourceId);
@@ -571,19 +550,10 @@ public class SwipeRecyclerView extends RecyclerView {
             if(((SwipeRecyclerViewAdapter) adapter).isFrontViewTranslationObservableEnabled())
                 ((SwipeRecyclerViewAdapter) adapter).getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
 
-        } else if(adapter instanceof SwipeRecyclerViewHeaderFooterAdapter){
-            if(((SwipeRecyclerViewHeaderFooterAdapter) adapter).isFrontViewTranslationObservableEnabled())
-                ((SwipeRecyclerViewHeaderFooterAdapter) adapter).getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
-
         } else if(adapter instanceof RecyclerViewMergeAdapter){
             for(int i = 0; i < ((RecyclerViewMergeAdapter) adapter).getSubAdapterCount(); i++){
                 if(((RecyclerViewMergeAdapter) adapter).getSubAdapter(i) instanceof SwipeRecyclerViewAdapter){
                     SwipeRecyclerViewAdapter subAdapter = (SwipeRecyclerViewAdapter) ((RecyclerViewMergeAdapter) adapter).getSubAdapter(i);
-
-                    if(subAdapter.isFrontViewTranslationObservableEnabled())
-                        subAdapter.getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);
-                } else if(((RecyclerViewMergeAdapter) adapter).getSubAdapter(i) instanceof SwipeRecyclerViewHeaderFooterAdapter){
-                    SwipeRecyclerViewHeaderFooterAdapter subAdapter = (SwipeRecyclerViewHeaderFooterAdapter) ((RecyclerViewMergeAdapter) adapter).getSubAdapter(i);
 
                     if(subAdapter.isFrontViewTranslationObservableEnabled())
                         subAdapter.getFrontViewTranslationObservable().frontViewTranslationChanged(frontView);

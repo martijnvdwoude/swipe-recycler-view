@@ -16,18 +16,17 @@ import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewMergeAdapter;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerView;
 import me.mvdw.swiperecyclerviewexample.R;
 import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewAdapter;
-import me.mvdw.swiperecyclerviewexample.adapter.ExampleSwipeRecyclerViewHeaderFooterAdapter;
 import me.mvdw.swiperecyclerviewexample.object.SwipeRecyclerViewItem;
 
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewHeaderFooterAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
+public class ExampleActivityFragment extends Fragment implements ExampleSwipeRecyclerViewAdapter.ExampleSwipeRecyclerViewContentAdapterListener {
 
     private SwipeRecyclerView swipeRecyclerView;
     private RecyclerViewMergeAdapter mergeAdapter;
     private ExampleSwipeRecyclerViewAdapter swipeRecyclerViewAdapter1;
-    private ExampleSwipeRecyclerViewHeaderFooterAdapter swipeRecyclerViewAdapter2;
+    private ExampleSwipeRecyclerViewAdapter swipeRecyclerViewAdapter2;
 
     private int count = 0;
 
@@ -74,7 +73,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         swipeRecyclerViewAdapter1.setFrontViewTranslationObservableEnabled(true);
 
         // New content adapter with headers and footers
-        swipeRecyclerViewAdapter2 = new ExampleSwipeRecyclerViewHeaderFooterAdapter(getContext());
+        swipeRecyclerViewAdapter2 = new ExampleSwipeRecyclerViewAdapter(getContext());
         swipeRecyclerViewAdapter2.setData(swipeRecyclerViewItems);
         swipeRecyclerViewAdapter2.setListener(this);
         swipeRecyclerViewAdapter2.setFrontViewTranslationObservableEnabled(true);
@@ -82,7 +81,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         // New header view
         TextView header = new TextView(getActivity());
         header.setText("Header");
-//        swipeRecyclerViewAdapter2.addHeaderView(header);
+//        swipeRecyclerViewAdapter1.addHeaderView(header);
 
         // New footer view
         TextView footer = new TextView(getActivity());
