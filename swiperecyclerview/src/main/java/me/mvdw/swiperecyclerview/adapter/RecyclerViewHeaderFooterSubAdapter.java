@@ -12,7 +12,7 @@ import me.mvdw.recyclerviewmergeadapter.adapter.RecyclerViewSubAdapter;
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public abstract class RecyclerViewHeaderFooterSubAdapter<VH extends RecyclerViewHeaderFooterSubAdapter.MainViewHolder> extends RecyclerViewSubAdapter<VH> {
+public abstract class RecyclerViewHeaderFooterSubAdapter extends RecyclerViewSubAdapter<RecyclerViewHeaderFooterSubAdapter.MainViewHolder> {
 
     protected ArrayList<?> mData;
 
@@ -22,24 +22,24 @@ public abstract class RecyclerViewHeaderFooterSubAdapter<VH extends RecyclerView
     private int mContentItemLayout;
 
     @Override
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MainViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch(viewType){
             case MainViewHolder.TYPE_HEADER:
-                return (VH) new HeaderViewHolder(new LinearLayout(parent.getContext()));
+                return new HeaderViewHolder(new LinearLayout(parent.getContext()));
 
             case MainViewHolder.TYPE_CONTENT:
                 View view = LayoutInflater.from(parent.getContext()).inflate(mContentItemLayout, parent, false);
-                return (VH) new MainViewHolder(view);
+                return new MainViewHolder(view);
 
             case MainViewHolder.TYPE_FOOTER:
-                return (VH) new FooterViewHolder(new LinearLayout(parent.getContext()));
+                return new FooterViewHolder(new LinearLayout(parent.getContext()));
         }
 
         return null;
     }
 
     @Override
-    public void onBindViewHolder(VH viewHolder, int position) {
+    public void onBindViewHolder(MainViewHolder viewHolder, int position) {
         super.onBindViewHolder(viewHolder, position);
         if(viewHolder instanceof HeaderViewHolder){
             if(mHeaderViews.get(position).getParent() != null)

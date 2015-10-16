@@ -11,7 +11,7 @@ import me.mvdw.swiperecyclerview.viewholder.SwipeableViewHolder;
 /**
  * Created by Martijn van der Woude on 07-09-15.
  */
-public class SwipeRecyclerViewAdapter extends RecyclerViewHeaderFooterSubAdapter<RecyclerViewHeaderFooterSubAdapter.MainViewHolder> {
+public class SwipeRecyclerViewAdapter extends RecyclerViewHeaderFooterSubAdapter {
 
     private int mBackLeftViewResourceId;
     private int mBackRightViewResourceId;
