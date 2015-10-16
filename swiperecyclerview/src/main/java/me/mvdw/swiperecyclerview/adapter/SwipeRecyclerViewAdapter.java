@@ -86,5 +86,5 @@ public class SwipeRecyclerViewAdapter extends RecyclerViewHeaderFooterSubAdapter
      * @param viewHolder reference to the viewHolder of the swiping row
      * @param frontViewTranslationX the X translation value of the front view
      */
-    protected void onFrontViewTranslationChanged(SwipeableViewHolder viewHolder, float frontViewTranslationX){}
+    public void onFrontViewTranslationChanged(SwipeableViewHolder viewHolder, float frontViewTranslationX){}
 }

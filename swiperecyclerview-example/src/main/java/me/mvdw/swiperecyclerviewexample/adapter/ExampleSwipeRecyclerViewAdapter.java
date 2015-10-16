@@ -89,7 +89,7 @@ public class ExampleSwipeRecyclerViewAdapter extends SwipeRecyclerViewAdapter {
     }
 
     @Override
-    protected void onFrontViewTranslationChanged(final SwipeableViewHolder viewHolder, float frontViewTranslationX){
+    public void onFrontViewTranslationChanged(final SwipeableViewHolder viewHolder, float frontViewTranslationX){
         // Little parallax effect example
         LinearLayout backRightView = (LinearLayout) viewHolder.getBackRightView();
         TextView backRightTextView = (TextView) backRightView.findViewById(R.id.back_right_text_view);

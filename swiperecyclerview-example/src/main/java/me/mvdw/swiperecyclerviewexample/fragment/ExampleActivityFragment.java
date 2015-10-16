@@ -86,7 +86,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         // New footer view
         TextView footer = new TextView(getActivity());
         footer.setText("Footer");
-//        swipeRecyclerViewAdapter2.addFooterView(footer);
+        swipeRecyclerViewAdapter2.addFooterView(footer);
 
         // Add adapters to merge adapter
         mergeAdapter.addAdapter(swipeRecyclerViewAdapter1);

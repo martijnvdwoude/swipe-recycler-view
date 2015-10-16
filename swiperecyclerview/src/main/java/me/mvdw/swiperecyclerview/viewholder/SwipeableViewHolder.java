@@ -9,6 +9,7 @@ import java.util.Observer;
 import me.mvdw.swiperecyclerview.R;
 import me.mvdw.swiperecyclerview.adapter.FrontViewTranslationObservable;
 import me.mvdw.swiperecyclerview.adapter.RecyclerViewHeaderFooterSubAdapter;
+import me.mvdw.swiperecyclerview.adapter.SwipeRecyclerViewAdapter;
 import me.mvdw.swiperecyclerview.view.SwipeRecyclerViewRowView;
 
 /**
@@ -54,7 +55,7 @@ public class SwipeableViewHolder extends RecyclerViewHeaderFooterSubAdapter.Main
     @Override
     public void update(Observable observable, Object frontView) {
         if(frontView == getFrontView()) {
-//            mAdapter.onFrontViewTranslationChanged(this, this.getFrontView().getTranslationX());
+            ((SwipeRecyclerViewAdapter) getAdapter()).onFrontViewTranslationChanged(this, this.getFrontView().getTranslationX());
         }
     }
 }
