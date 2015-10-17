@@ -9,7 +9,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/recyclerviewmergeadapter-release" />
             <option value="$PROJECT_DIR$/swiperecyclerview" />
             <option value="$PROJECT_DIR$/swiperecyclerview-example" />
           </set>
