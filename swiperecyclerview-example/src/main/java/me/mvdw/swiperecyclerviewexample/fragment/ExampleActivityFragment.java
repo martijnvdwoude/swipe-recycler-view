@@ -81,7 +81,7 @@ public class ExampleActivityFragment extends Fragment implements ExampleSwipeRec
         // New header view
         TextView header = new TextView(getActivity());
         header.setText("Header");
-//        swipeRecyclerViewAdapter1.addHeaderView(header);
+        swipeRecyclerViewAdapter1.addHeaderView(header);
 
         // New footer view
         TextView footer = new TextView(getActivity());

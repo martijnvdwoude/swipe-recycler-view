@@ -384,7 +384,9 @@ public class SwipeRecyclerView extends RecyclerView {
 
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
-                updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                if(mOpenedRowView != null) {
+                    updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                }
             }
         });
 
@@ -425,7 +427,9 @@ public class SwipeRecyclerView extends RecyclerView {
 
         anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
-                updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                if(mOpenedRowView != null) {
+                    updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                }
             }
         });
 
@@ -486,7 +490,9 @@ public class SwipeRecyclerView extends RecyclerView {
             // Update the front view translation observable during updates of the animation
             anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                    if (mOpenedRowView != null) {
+                        updateFrontViewTranslationObservables(mOpenedRowView.getFrontView());
+                    }
                 }
             });
         } else if(mTouchedRowView != null) {
@@ -499,7 +505,9 @@ public class SwipeRecyclerView extends RecyclerView {
             // Update the front view translation observable during updates of the animation
             anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                    if (mTouchedRowView != null) {
+                        updateFrontViewTranslationObservables(mTouchedRowView.getFrontView());
+                    }
                 }
             });
         }
