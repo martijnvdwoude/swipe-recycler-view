@@ -282,6 +282,8 @@ public class SwipeRecyclerView extends RecyclerView {
                                 return true;
                             }
 
+                            closeOpenedItem();
+
                             break;
 
                         case LEFT:
